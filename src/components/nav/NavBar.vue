@@ -1,0 +1,54 @@
+<script setup lang="ts">
+import { RouterLink } from 'vue-router'
+import MyContainer from './MyContainer.vue'
+</script>
+
+<template>
+  <ALayout>
+    <ALayoutHeader class="header-style">
+      <MyContainer>
+        <div class="nav-container">
+          <div class="right-content">
+            <RouterLink to="/" class="nav-title"> Enterprise Master Data Governance </RouterLink>
+          </div>
+          <div class="left-content">
+            <AButton type="link" class="nav-links">Features</AButton>
+            <AButton type="link" class="nav-links">Pricing</AButton>
+            <AButton type="primary" class="nav-button">Get Started</AButton>
+          </div>
+        </div>
+      </MyContainer>
+    </ALayoutHeader>
+  </ALayout>
+</template>
+
+<style scoped>
+.header-style {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.nav-container {
+  /* background-color: aqua; */
+  display: flex;
+  justify-content: space-between;
+}
+.nav-title {
+  color: black;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+}
+.right-content {
+  display: flex;
+  align-items: center;
+  color: black;
+}
+.nav-links {
+  color: #6b7280;
+}
+.nav-button {
+  background-color: #4f46e5;
+  height: 60%;
+  color: white;
+}
+</style>
