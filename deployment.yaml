@@ -36,6 +36,6 @@ spec:
     app: edgp-app-web
   ports:
     - protocol: TCP
-      port: 443
+      port: 80
       targetPort: 80
   type: NodePort
