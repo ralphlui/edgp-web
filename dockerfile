@@ -23,7 +23,7 @@ FROM nginx:stable-alpine as runner
 WORKDIR /app
 
 # Copy build output to Nginx html directory
-COPY --from=build ./dist /usr/share/nginx/html
+COPY --from=builder ./dist /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
