@@ -5,12 +5,14 @@ import {
   MenuUnfoldOutlined,
   UserOutlined,
   LogoutOutlined,
+  BankOutlined,
 } from '@ant-design/icons-vue'
 import { Layout, Menu, Modal } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import dashboardIcon from '@/assets/dashboardIcon.png'
 import InviteNewUser from '@/components/auth/InviteNewUser.vue'
 import DataDashboard from '@/components/dataDashboard/DataDashboard.vue'
+import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
 
 const collapsed = ref(false)
 const selectedKeys = ref(['2']) // Default to User Onboarding
@@ -18,7 +20,14 @@ const inviteModalRef = ref()
 
 // Compute which component to show based on selected menu item
 const currentComponent = computed(() => {
-  return selectedKeys.value[0] === '1' ? 'DataDashboard' : 'UserOnboarding'
+  switch (selectedKeys.value[0]) {
+    case '1':
+      return 'DataDashboard'
+    case '3':
+      return 'OrganizationRegister'
+    default:
+      return 'UserOnboarding'
+  }
 })
 
 // Mock data for statistics
@@ -129,6 +138,12 @@ const handleLogout = () => {
           </template>
           <span>User Onboarding</span>
         </Menu.Item>
+        <Menu.Item key="3">
+          <template #icon>
+            <BankOutlined />
+          </template>
+          <span>Organization Register</span>
+        </Menu.Item>
         <Menu.Item key="logout" @click="handleLogout">
           <template #icon>
             <LogoutOutlined />
@@ -143,6 +158,7 @@ const handleLogout = () => {
       <Layout.Content class="p-6" style="background: #e5e7eb">
         <!-- Conditional rendering based on selected menu item -->
         <DataDashboard v-if="currentComponent === 'DataDashboard'" />
+        <OrganizationRegister v-else-if="currentComponent === 'OrganizationRegister'" />
 
         <template v-else>
           <div class="flex justify-between items-center mb-6">
