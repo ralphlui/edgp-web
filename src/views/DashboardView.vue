@@ -42,7 +42,12 @@ const userColumns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Email', dataIndex: 'email', key: 'email' },
   { title: 'Role', dataIndex: 'role', key: 'role' },
-  { title: 'Status', dataIndex: 'status', key: 'status' },
+  {
+    title: 'Status',
+    dataIndex: 'status',
+    key: 'status',
+    slots: { customRender: 'status' },
+  },
   { title: 'Last Login', dataIndex: 'lastLogin', key: 'lastLogin' },
   { title: 'Contributions', dataIndex: 'contributions', key: 'contributions' },
   { title: 'Actions', key: 'actions', slots: { customRender: 'actions' } },
@@ -63,7 +68,7 @@ const userData = ref([
     name: 'Sarah Johnson',
     email: 'sarah.j@example.com',
     role: 'Editor',
-    status: 'Active',
+    status: 'Pending',
     lastLogin: '2025-06-13',
     contributions: 32,
   },
@@ -205,6 +210,17 @@ const handleLogout = () => {
                 :pagination="{ pageSize: 10 }"
                 class="user-management-table"
               >
+                <template #status="{ record }">
+                  <span
+                    :class="{
+                      'text-green-600': record.status === 'Active',
+                      'text-red-600': record.status === 'Pending',
+                      'text-gray-500': record.status === 'Inactive',
+                    }"
+                  >
+                    {{ record.status }}
+                  </span>
+                </template>
                 <template #actions="{ record }">
                   <a-space>
                     <a class="text-blue-600 hover:text-blue-800" @click="() => handleEdit(record)"
