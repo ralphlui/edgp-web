@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import { ref } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
+import { ref, computed } from 'vue'
 import MyContainer from './MyContainer.vue'
 import AppAuth from '../auth/AppAuth.vue'
 
+const route = useRoute()
 const authRef = ref()
+
+// Hide navbar on dashboard
+const shouldShowNavbar = computed(() => route.path !== '/dashboard')
 
 const handleGetStarted = () => {
   authRef.value?.showModal()
@@ -19,7 +23,7 @@ const scrollToSection = (sectionId: string) => {
 </script>
 
 <template>
-  <ALayout>
+  <ALayout v-if="shouldShowNavbar">
     <ALayoutHeader class="header-style">
       <MyContainer>
         <div class="nav-container">
