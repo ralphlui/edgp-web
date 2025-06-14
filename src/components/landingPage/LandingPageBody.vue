@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppAuth from '../auth/AppAuth.vue'
 import AButton from 'ant-design-vue/es/button'
 
+const route = useRoute()
 const authRef = ref()
 
+const isResetPasswordPage = computed(() => route.path === '/reset-password')
+
 const handleStartFreeTrial = () => {
-  authRef.value?.showModal()
+  if (!isResetPasswordPage.value) {
+    authRef.value?.showModal()
+  }
 }
 </script>
 
