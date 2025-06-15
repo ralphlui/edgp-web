@@ -4,8 +4,9 @@ import { Modal, Form, Input, Select, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { roleService } from '@/services/role.service'
 import { organizationService } from '@/services/organization.service'
+import { userService } from '@/services/user.service'
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'invite-success'])
 const visible = ref(false)
 const rolesLoading = ref(false)
 const orgsLoading = ref(false)
@@ -63,10 +64,30 @@ const show = () => {
   fetchRoles()
 }
 
-const handleSendInvite = () => {
-  // TODO: Implement invite functionality
-  message.success(`Invitation sent to ${inviteForm.value.email}`)
-  handleCancel()
+const handleSendInvite = async () => {
+  if (!inviteForm.value.email || !inviteForm.value.organization || !inviteForm.value.role) {
+    message.error('Please fill in all required fields')
+    return
+  }
+
+  try {
+    const response = await userService.inviteUser({
+      email: inviteForm.value.email,
+      organizationId: inviteForm.value.organization,
+      role: inviteForm.value.role,
+    })
+
+    if (response.success) {
+      message.success(response.message || 'Invitation sent successfully')
+      emit('invite-success') // So parent component can refresh the user list
+      handleCancel()
+    } else {
+      message.error(response.message || 'Failed to send invitation')
+    }
+  } catch (error) {
+    console.error('Failed to send invitation:', error)
+    message.error('Failed to send invitation. Please try again.')
+  }
 }
 
 const handleCancel = () => {

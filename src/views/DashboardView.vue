@@ -296,7 +296,7 @@ const handleLogout = () => {
           </div>
         </template>
 
-        <InviteNewUser ref="inviteModalRef" />
+        <InviteNewUser ref="inviteModalRef" @invite-success="loadUserData" />
       </Layout.Content>
     </Layout>
   </Layout>
