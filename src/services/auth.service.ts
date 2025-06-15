@@ -1,7 +1,7 @@
 import axios from 'axios'
 import ApiService from './base-api.service'
 import { API_ENDPOINTS } from '@/config/api.config'
-import type { AuthResponse } from '@/types/auth.types'
+import type { AuthResponse, ResetPasswordRequest, ResetPasswordResponse } from '@/types/auth.types'
 
 class AuthService extends ApiService {
   async login(email: string, password: string): Promise<AuthResponse> {
@@ -59,6 +59,50 @@ class AuthService extends ApiService {
     }
   }
 
+  async resetPassword(email: string, password: string): Promise<void> {
+    try {
+      console.log('Reset password request:', {
+        endpoint: API_ENDPOINTS.auth.resetPassword,
+        email,
+        timestamp: new Date().toISOString(),
+      })
+
+      const response = await this.patch<ResetPasswordResponse, ResetPasswordRequest>(
+        API_ENDPOINTS.auth.resetPassword,
+        {
+          email,
+          password,
+        },
+      )
+
+      console.log('Reset password response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        data: response.data,
+        success: response.data.success,
+        message: response.data.message,
+        userDetails: response.data.data
+          ? {
+              userID: response.data.data.userID,
+              email: response.data.data.email,
+              username: response.data.data.username,
+              role: response.data.data.role.roleName,
+              verified: response.data.data.verified,
+              active: response.data.data.active,
+            }
+          : null,
+      })
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Password reset failed')
+      }
+    } catch (error) {
+      this.handleError(error)
+      throw error
+    }
+  }
+
   private handleError(error: unknown): void {
     if (axios.isAxiosError(error)) {
       if (error.code === 'ERR_NETWORK') {
@@ -79,7 +123,11 @@ class AuthService extends ApiService {
         data: error.response?.data,
         headers: error.response?.headers,
       })
+
+      throw error
     }
+
+    throw error
   }
 }
 

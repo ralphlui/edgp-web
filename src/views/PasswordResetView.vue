@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { authService } from '@/services/auth.service'
 
 const resetEmail = ref('')
 const newPassword = ref('')
@@ -74,18 +75,22 @@ const handleResetPassword = async () => {
 
   loading.value = true
   try {
-    // TODO: Implement actual password reset logic here
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulated API call
+    await authService.resetPassword(resetEmail.value, newPassword.value)
     message.success({
-      content: 'Password reset instructions sent! Please check your email.',
-      duration: 4,
+      content: 'Successfully reset the password. Please try to Login!',
+      duration: 3,
     })
-    // Allow user to see the success message before redirecting
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    router.push('/')
+    // Wait a moment for the user to see the success message
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // Navigate to home and show login modal
+    router.push({
+      name: 'home',
+      query: { showLogin: 'true' }, // This will trigger the login modal to open
+    })
   } catch (err: unknown) {
     const errorMessage =
-      err instanceof Error ? err.message : 'Failed to send reset instructions. Please try again.'
+      err instanceof Error ? err.message : 'Failed to reset password. Please try again.'
 
     message.error({
       content: errorMessage,

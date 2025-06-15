@@ -27,3 +27,15 @@ export interface AuthResponse {
   access_token?: string
   refresh_token?: string
 }
+
+export interface ResetPasswordRequest {
+  email: string
+  password: string
+}
+
+export interface ResetPasswordResponse {
+  success: boolean
+  message: string
+  totalRecord: number
+  data: User
+}

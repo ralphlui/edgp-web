@@ -4,6 +4,7 @@ interface ApiEndpoints {
     login: string
     logout: string
     refresh: string
+    resetPassword: string
   }
   users: {
     list: string
@@ -20,6 +21,7 @@ export const API_ENDPOINTS: ApiEndpoints = {
     login: '/users/login',
     logout: '/users/logout',
     refresh: '/auth/refresh',
+    resetPassword: '/users/resetPassword',
   },
   users: {
     list: '/users',

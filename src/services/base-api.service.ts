@@ -93,6 +93,13 @@ class ApiService {
   protected async delete<T>(url: string): Promise<AxiosResponse<T>> {
     return this.api.delete<T>(url)
   }
+
+  protected async patch<T, D = Record<string, unknown>>(
+    url: string,
+    data?: D,
+  ): Promise<AxiosResponse<T>> {
+    return this.api.patch<T>(url, data)
+  }
 }
 
 export default ApiService

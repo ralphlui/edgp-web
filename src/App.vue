@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { computed } from 'vue'
-import NavBar from './components/nav/NavBar.vue'
-
-const route = useRoute()
-const isDashboard = computed(() => route.path === '/dashboard')
+import { RouterView } from 'vue-router'
+import NavBar from '@/components/nav/NavBar.vue'
 </script>
 
 <template>
-  <div>
-    <NavBar v-if="!isDashboard" />
-    <RouterView />
-  </div>
+  <NavBar />
+  <RouterView />
 </template>
 
 <style scoped></style>
