@@ -1,22 +1,43 @@
 <script setup lang="ts">
 import { ref, defineEmits } from 'vue'
 import { Modal, Form, Input, Select, message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
+import { roleService } from '@/services/role.service'
 
 const emit = defineEmits(['close'])
 const visible = ref(false)
+const loading = ref(false)
 const inviteForm = ref({
   email: '',
   role: undefined,
 })
 
-const roleOptions = [
-  { label: 'Admin', value: 'admin' },
-  { label: 'Data Analyst', value: 'dataAnalyst' },
-  { label: 'Policy Manager', value: 'policyManager' },
-]
+const roleOptions = ref<{ label: string; value: string }[]>([])
+
+const router = useRouter()
+
+const fetchRoles = async () => {
+  try {
+    loading.value = true
+    const roles = await roleService.getRoles()
+    roleOptions.value = roles.map((role) => ({
+      label: role.roleDescription,
+      value: role.roleName,
+    }))
+  } catch (error) {
+    console.error('Error fetching roles:', error)
+    message.error('Please log in again to continue')
+    visible.value = false
+    router.push('/')
+  } finally {
+    loading.value = false
+  }
+}
 
 const show = () => {
   visible.value = true
+  // Fetch roles when the modal is opened
+  fetchRoles()
 }
 
 const handleSendInvite = () => {
@@ -51,6 +72,7 @@ defineExpose({ show })
           <Select
             v-model:value="inviteForm.role"
             :options="roleOptions"
+            :loading="loading"
             placeholder="Select role"
             :style="{ width: '100%' }"
           />
