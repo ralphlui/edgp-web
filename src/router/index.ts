@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import HomeView from '../views/HomeView.vue'
 import PasswordResetView from '../views/PasswordResetView.vue'
 import DashboardView from '../views/DashboardView.vue'
@@ -23,6 +24,27 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
   ],
+})
+
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+
+  // Initialize auth state from localStorage
+  if (!authStore.accessToken) {
+    authStore.initAuth()
+  }
+
+  if (requiresAuth && !authStore.accessToken) {
+    // Redirect to home page if trying to access protected route without auth
+    next({ name: 'home' })
+  } else if (to.path === '/' && authStore.accessToken) {
+    // Redirect to dashboard if already authenticated
+    next({ name: 'dashboard' })
+  } else {
+    next()
+  }
 })
 
 export default router
