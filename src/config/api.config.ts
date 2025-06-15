@@ -26,7 +26,7 @@ interface ApiEndpoints {
 }
 
 export const API_ENDPOINTS: ApiEndpoints = {
-  base: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/admin',
+  base: import.meta.env.VITE_ADMIN_API_URL || 'http://localhost:8081/api/admin',
   orgBase: import.meta.env.VITE_ORGANIZATION_API_URL || 'http://localhost:8082/api',
   auth: {
     login: '/users/login',
