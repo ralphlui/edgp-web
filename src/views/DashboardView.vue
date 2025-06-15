@@ -4,8 +4,8 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
-  LogoutOutlined,
   BankOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons-vue'
 import { Layout, Menu, Modal } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
@@ -13,10 +13,13 @@ import dashboardIcon from '@/assets/dashboardIcon.png'
 import InviteNewUser from '@/components/auth/InviteNewUser.vue'
 import DataDashboard from '@/components/dataDashboard/DataDashboard.vue'
 import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
+import { authService } from '@/services/auth.service'
+import { useAuthStore } from '@/stores/auth'
 
 const collapsed = ref(false)
 const selectedKeys = ref(['2']) // Default to User Onboarding
 const inviteModalRef = ref()
+const router = useRouter()
 
 // Compute which component to show based on selected menu item
 const currentComponent = computed(() => {
@@ -81,11 +84,22 @@ const handleEdit = (record: (typeof userData.value)[0]) => {
 }
 
 const handleDelete = (record: (typeof userData.value)[0]) => {
-  console.log('Delete user:', record)
-  // TODO: Implement delete functionality
+  Modal.confirm({
+    title: 'Delete User',
+    content: `Are you sure you want to delete ${record.name}?`,
+    okText: 'Yes',
+    okType: 'danger',
+    cancelText: 'No',
+    onOk: () => {
+      // Here you would typically make an API call to delete the user
+      userData.value = userData.value.filter((user) => user.key !== record.key)
+      Modal.success({
+        title: 'User Deleted',
+        content: `${record.name} has been successfully deleted.`,
+      })
+    },
+  })
 }
-
-const router = useRouter()
 
 const handleInviteUser = () => {
   inviteModalRef.value?.show()
@@ -97,9 +111,40 @@ const handleLogout = () => {
     content: 'Are you sure you want to logout?',
     okText: 'Yes',
     cancelText: 'No',
-    onOk: () => {
-      // TODO: Add any logout cleanup logic here (clear tokens, etc.)
-      router.push('/')
+    onOk: async () => {
+      try {
+        await authService.logout()
+
+        // Clear all auth state first
+        const authStore = useAuthStore()
+        authStore.clearAuth() // Clear Pinia store state
+
+        // Clear browser storage
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        document.cookie.split(';').forEach((c) => {
+          document.cookie = c
+            .replace(/^ +/, '')
+            .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/')
+        })
+
+        // Navigate and show success message
+        await router.push({ name: 'home' }) // Wait for navigation to complete
+        Modal.success({
+          title: 'Logout Successful',
+          content: 'You have been successfully logged out.',
+        })
+      } catch (error) {
+        console.error('Logout failed:', error)
+        // Even on error, clear auth state and redirect
+        const authStore = useAuthStore()
+        authStore.clearAuth()
+        await router.push({ name: 'home' })
+        Modal.error({
+          title: 'Logout Failed',
+          content: error instanceof Error ? error.message : 'Failed to logout. Please try again.',
+        })
+      }
     },
   })
 }
@@ -129,33 +174,36 @@ const handleLogout = () => {
         >
       </div>
 
-      <!-- Navigation Menu -->
-      <Menu v-model:selectedKeys="selectedKeys" mode="inline" class="border-r-0">
-        <Menu.Item key="1">
-          <template #icon>
-            <img :src="dashboardIcon" alt="Dashboard" class="w-5 h-5" />
-          </template>
-          <span>Data Dashboard</span>
-        </Menu.Item>
-        <Menu.Item key="2">
-          <template #icon>
-            <UserOutlined />
-          </template>
-          <span>User Onboarding</span>
-        </Menu.Item>
-        <Menu.Item key="3">
-          <template #icon>
-            <BankOutlined />
-          </template>
-          <span>Organization Register</span>
-        </Menu.Item>
-        <Menu.Item key="logout" @click="handleLogout">
-          <template #icon>
-            <LogoutOutlined />
-          </template>
-          <span>Logout</span>
-        </Menu.Item>
-      </Menu>
+      <div class="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
+        <!-- Navigation Menu -->
+        <Menu v-model:selectedKeys="selectedKeys" mode="inline" class="border-r-0 flex-1">
+          <Menu.Item key="1">
+            <template #icon>
+              <img :src="dashboardIcon" alt="Dashboard" class="w-5 h-5" />
+            </template>
+            <span>Data Dashboard</span>
+          </Menu.Item>
+          <Menu.Item key="2">
+            <template #icon>
+              <UserOutlined />
+            </template>
+            <span>User Onboarding</span>
+          </Menu.Item>
+          <Menu.Item key="3">
+            <template #icon>
+              <BankOutlined />
+            </template>
+            <span>Organization Register</span>
+          </Menu.Item>
+          <Menu.Divider class="my-2" />
+          <Menu.Item key="logout" @click="handleLogout">
+            <template #icon>
+              <LogoutOutlined />
+            </template>
+            <span>Logout</span>
+          </Menu.Item>
+        </Menu>
+      </div>
     </Layout.Sider>
 
     <Layout>

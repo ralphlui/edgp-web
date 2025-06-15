@@ -2,10 +2,13 @@
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { authService } from '@/services/auth.service'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
 const visible = ref(false)
+const authStore = useAuthStore()
 
 // Only allow showing modal if not on reset password page
 const showModal = () => {
@@ -63,8 +66,8 @@ const handleLogin = async () => {
 
   loading.value = true
   try {
-    // TODO: Implement actual login logic here
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulated API call
+    const response = await authService.login(email.value, password.value)
+    authStore.setAuth(response)
     message.success('Login successful!')
     visible.value = false
     router.push('/dashboard')

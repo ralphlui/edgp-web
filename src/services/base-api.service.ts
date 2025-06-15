@@ -1,0 +1,98 @@
+import axios from 'axios'
+import type { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
+import { API_ENDPOINTS } from '@/config/api.config'
+
+interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+}
+
+class ApiService {
+  private api: AxiosInstance
+
+  constructor() {
+    this.api = axios.create({
+      baseURL: API_ENDPOINTS.base,
+      timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    })
+
+    this.setupInterceptors()
+  }
+
+  private setupInterceptors() {
+    // Request interceptor
+    this.api.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('access_token')
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`
+        }
+        return config
+      },
+      (error) => {
+        return Promise.reject(error)
+      },
+    )
+
+    // Response interceptor
+    this.api.interceptors.response.use(
+      (response) => response,
+      async (error: AxiosError) => {
+        const originalRequest = error.config as CustomInternalAxiosRequestConfig
+
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+          originalRequest._retry = true
+          try {
+            const refreshToken = localStorage.getItem('refresh_token')
+            const response = await this.api.post(API_ENDPOINTS.auth.refresh, {
+              token: refreshToken,
+            })
+            const { access_token } = response.data
+
+            localStorage.setItem('access_token', access_token)
+            this.api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+
+            return this.api(originalRequest)
+          } catch (refreshError) {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('refresh_token')
+            window.location.href = '/login'
+            return Promise.reject(refreshError)
+          }
+        }
+        return Promise.reject(error)
+      },
+    )
+  }
+
+  protected async get<T, P = Record<string, unknown>>(
+    url: string,
+    params?: P,
+  ): Promise<AxiosResponse<T>> {
+    return this.api.get<T>(url, { params })
+  }
+
+  protected async post<T, D = Record<string, unknown>>(
+    url: string,
+    data?: D,
+  ): Promise<AxiosResponse<T>> {
+    return this.api.post<T>(url, data)
+  }
+
+  protected async put<T, D = Record<string, unknown>>(
+    url: string,
+    data?: D,
+  ): Promise<AxiosResponse<T>> {
+    return this.api.put<T>(url, data)
+  }
+
+  protected async delete<T>(url: string): Promise<AxiosResponse<T>> {
+    return this.api.delete<T>(url)
+  }
+}
+
+export default ApiService
