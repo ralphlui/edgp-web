@@ -20,7 +20,7 @@ export const API_ENDPOINTS: ApiEndpoints = {
   auth: {
     login: '/users/login',
     logout: '/users/logout',
-    refresh: '/auth/refresh',
+    refresh: '/users/refreshToken',
     resetPassword: '/users/resetPassword',
   },
   users: {

@@ -6,8 +6,8 @@ interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
 }
 
-class ApiService {
-  private api: AxiosInstance
+export class ApiService {
+  protected api: AxiosInstance
 
   constructor() {
     this.api = axios.create({
@@ -28,39 +28,74 @@ class ApiService {
     this.api.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('access_token')
+        console.log('API Request:', {
+          url: config.url,
+          method: config.method,
+          hasToken: !!token,
+        })
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
+        } else {
+          console.warn('No access token found in localStorage')
         }
         return config
       },
       (error) => {
+        console.error('API Request Error:', error)
         return Promise.reject(error)
       },
     )
 
     // Response interceptor
     this.api.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        console.log('API Response Success:', {
+          url: response.config.url,
+          status: response.status,
+          data: response.data,
+        })
+        return response
+      },
       async (error: AxiosError) => {
+        console.error('API Response Error:', {
+          url: error.config?.url,
+          status: error.response?.status,
+          message: error.message,
+          response: error.response?.data,
+        })
         const originalRequest = error.config as CustomInternalAxiosRequestConfig
 
         if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
           originalRequest._retry = true
           try {
             const refreshToken = localStorage.getItem('refresh_token')
+            console.log('Attempting to refresh token...', { hasRefreshToken: !!refreshToken })
+
+            if (!refreshToken) {
+              throw new Error('No refresh token available')
+            }
+
             const response = await this.api.post(API_ENDPOINTS.auth.refresh, {
               token: refreshToken,
             })
+            console.log('Token refresh response:', response.data)
+
             const { access_token } = response.data
+
+            if (!access_token) {
+              throw new Error('No access token received from refresh endpoint')
+            }
 
             localStorage.setItem('access_token', access_token)
             this.api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+            originalRequest.headers.Authorization = `Bearer ${access_token}`
 
             return this.api(originalRequest)
           } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError)
             localStorage.removeItem('access_token')
             localStorage.removeItem('refresh_token')
-            window.location.href = '/login'
+            window.location.href = '/'
             return Promise.reject(refreshError)
           }
         }
