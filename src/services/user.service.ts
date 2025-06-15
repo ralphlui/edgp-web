@@ -21,6 +21,23 @@ export interface UserListResponse {
   }
 }
 
+export interface InviteUserRequest {
+  email: string
+  role: string
+  organizationId: string
+}
+
+export interface InviteUserResponse {
+  success: boolean
+  message: string
+  totalRecord: number
+  data: {
+    email: string
+    roleName: string
+    status: string
+  }
+}
+
 class UserService extends ApiService {
   public async getUsers(page: number = 0, size: number = 5): Promise<UserListResponse> {
     console.log('UserService: Fetching users with params:', { page, size })
@@ -32,6 +49,18 @@ class UserService extends ApiService {
       return response.data
     } catch (error) {
       console.error('UserService: Failed to fetch users:', error)
+      throw error
+    }
+  }
+
+  public async inviteUser(request: InviteUserRequest): Promise<InviteUserResponse> {
+    try {
+      console.debug('UserService: Inviting user:', request)
+      const response = await this.api.post<InviteUserResponse>('/users/invite', request)
+      console.debug('UserService: Successfully invited user:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('UserService: Failed to invite user:', error)
       throw error
     }
   }

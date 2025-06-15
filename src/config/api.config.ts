@@ -12,6 +12,7 @@ interface ApiEndpoints {
     create: string
     update: string
     delete: string
+    invite: string
   }
   organizations: {
     list: string
@@ -38,6 +39,7 @@ export const API_ENDPOINTS: ApiEndpoints = {
     create: '/users',
     update: '/users',
     delete: '/users',
+    invite: '/users/invite',
   },
   organizations: {
     list: '/orgs',
