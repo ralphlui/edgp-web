@@ -3,22 +3,44 @@ import { ref, defineEmits } from 'vue'
 import { Modal, Form, Input, Select, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { roleService } from '@/services/role.service'
+import { organizationService } from '@/services/organization.service'
 
 const emit = defineEmits(['close'])
 const visible = ref(false)
-const loading = ref(false)
+const rolesLoading = ref(false)
+const orgsLoading = ref(false)
 const inviteForm = ref({
   email: '',
+  organization: undefined,
   role: undefined,
 })
 
 const roleOptions = ref<{ label: string; value: string }[]>([])
+const organizationOptions = ref<{ label: string; value: string }[]>([])
 
 const router = useRouter()
 
+const fetchOrganizations = async () => {
+  try {
+    orgsLoading.value = true
+    const organizations = await organizationService.getOrganizations()
+    organizationOptions.value = organizations.map((org) => ({
+      label: org.organizationName,
+      value: org.organizationId,
+    }))
+  } catch (error) {
+    console.error('Error fetching organizations:', error)
+    message.error('Please log in again to continue')
+    visible.value = false
+    router.push('/')
+  } finally {
+    orgsLoading.value = false
+  }
+}
+
 const fetchRoles = async () => {
   try {
-    loading.value = true
+    rolesLoading.value = true
     const roles = await roleService.getRoles()
     roleOptions.value = roles.map((role) => ({
       label: role.roleDescription,
@@ -30,13 +52,14 @@ const fetchRoles = async () => {
     visible.value = false
     router.push('/')
   } finally {
-    loading.value = false
+    rolesLoading.value = false
   }
 }
 
 const show = () => {
   visible.value = true
-  // Fetch roles when the modal is opened
+  // Fetch data when the modal is opened
+  fetchOrganizations()
   fetchRoles()
 }
 
@@ -48,7 +71,7 @@ const handleSendInvite = () => {
 
 const handleCancel = () => {
   visible.value = false
-  inviteForm.value = { email: '', role: undefined }
+  inviteForm.value = { email: '', organization: undefined, role: undefined }
   emit('close')
 }
 
@@ -68,11 +91,20 @@ defineExpose({ show })
             :style="{ width: '100%' }"
           />
         </Form.Item>
+        <Form.Item label="Organization">
+          <Select
+            v-model:value="inviteForm.organization"
+            :options="organizationOptions"
+            :loading="orgsLoading"
+            placeholder="Select organization"
+            :style="{ width: '100%' }"
+          />
+        </Form.Item>
         <Form.Item label="Role">
           <Select
             v-model:value="inviteForm.role"
             :options="roleOptions"
-            :loading="loading"
+            :loading="rolesLoading"
             placeholder="Select role"
             :style="{ width: '100%' }"
           />

@@ -2,6 +2,7 @@ import axios from 'axios'
 import ApiService from './base-api.service'
 import { API_ENDPOINTS } from '@/config/api.config'
 import type { AuthResponse, ResetPasswordRequest, ResetPasswordResponse } from '@/types/auth.types'
+import { useAuthStore } from '@/stores/auth'
 
 class AuthService extends ApiService {
   async login(email: string, password: string): Promise<AuthResponse> {
@@ -12,30 +13,75 @@ class AuthService extends ApiService {
       })
 
       const { data, headers } = response
-      console.log('Login response:', data)
-      console.log('Response headers:', headers)
+      console.debug('[Auth Service] Login response:', {
+        success: data.success,
+        hasAccessToken: !!data.access_token,
+        hasRefreshToken: !!data.refresh_token,
+        headers: headers,
+      })
 
-      // Handle cookies if present
-      const cookies = document.cookie.split(';').reduce(
-        (acc, cookie) => {
-          const [key, value] = cookie.trim().split('=')
-          acc[key] = value
-          return acc
-        },
-        {} as Record<string, string>,
-      )
+      // Try to get token from response data first
+      let accessToken = data.access_token
+      let refreshToken = data.refresh_token
 
-      const accessToken = cookies['access_token'] || cookies['accessToken'] || cookies['jwt']
-      const refreshToken = cookies['refresh_token'] || cookies['refreshToken']
+      // If not in response data, try cookies
+      if (!accessToken || !refreshToken) {
+        const cookieMap = document.cookie.split(';').reduce(
+          (acc, cookie) => {
+            const [key, value] = cookie.trim().split('=')
+            acc[key] = value
+            return acc
+          },
+          {} as Record<string, string>,
+        )
 
-      if (accessToken) localStorage.setItem('access_token', accessToken)
-      if (refreshToken) localStorage.setItem('refresh_token', refreshToken)
+        console.debug('[Auth Service] Checking cookies:', {
+          availableCookies: Object.keys(cookieMap),
+          hasAccessTokenCookie: !!(
+            cookieMap['access_token'] ||
+            cookieMap['accessToken'] ||
+            cookieMap['jwt']
+          ),
+          hasRefreshTokenCookie: !!(cookieMap['refresh_token'] || cookieMap['refreshToken']),
+        })
 
-      return {
+        if (!accessToken) {
+          accessToken = cookieMap['access_token'] || cookieMap['accessToken'] || cookieMap['jwt']
+        }
+        if (!refreshToken) {
+          refreshToken = cookieMap['refresh_token'] || cookieMap['refreshToken']
+        }
+      }
+
+      // Store tokens in both localStorage and Pinia store if available
+      if (accessToken) {
+        localStorage.setItem('access_token', accessToken)
+        console.debug('[Auth Service] Access token stored:', {
+          preview: accessToken.substring(0, 20) + '...',
+          length: accessToken.length,
+          source: data.access_token ? 'response data' : 'cookies',
+        })
+      } else {
+        console.warn('[Auth Service] No access token available from response or cookies')
+      }
+
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken)
+        console.debug('[Auth Service] Refresh token stored')
+      }
+
+      // Update Pinia store
+      const authStore = useAuthStore()
+      const authData = {
         ...data,
-        authenticated: true,
         access_token: accessToken,
         refresh_token: refreshToken,
+      }
+      authStore.setAuth(authData)
+
+      return {
+        ...authData,
+        authenticated: !!accessToken,
       }
     } catch (error) {
       this.handleError(error)
