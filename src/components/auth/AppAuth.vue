@@ -26,6 +26,20 @@ watch(
     }
   },
 )
+
+// Show login modal when redirected from password reset page
+watch(
+  () => route.query,
+  (query) => {
+    if (query.showLogin === 'true' && route.path !== '/reset-password') {
+      visible.value = true
+      // Remove the query parameter
+      router.replace({ query: {} })
+    }
+  },
+  { immediate: true },
+)
+
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
