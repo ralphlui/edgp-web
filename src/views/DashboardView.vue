@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -7,19 +7,56 @@ import {
   BankOutlined,
   LogoutOutlined,
 } from '@ant-design/icons-vue'
-import { Layout, Menu, Modal } from 'ant-design-vue'
+import { Layout, Menu, Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import dashboardIcon from '@/assets/dashboardIcon.png'
 import InviteNewUser from '@/components/auth/InviteNewUser.vue'
 import DataDashboard from '@/components/dataDashboard/DataDashboard.vue'
 import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
 import { authService } from '@/services/auth.service'
+import { userService } from '@/services/user.service'
 import { useAuthStore } from '@/stores/auth'
+import type { UserListResponse } from '@/services/user.service'
 
 const collapsed = ref(false)
 const selectedKeys = ref(['2']) // Default to User Onboarding
 const inviteModalRef = ref()
 const router = useRouter()
+
+// Stats data from API
+const stats = ref({
+  totalUsers: 0,
+  activeUsers: 0,
+  pendingInvites: 0,
+})
+
+// User data from API
+const userData = ref<UserListResponse['data']['users']>([])
+const loading = ref(false)
+
+// Load user data and stats
+const loadUserData = async () => {
+  try {
+    loading.value = true
+    const response = await userService.getUsers()
+
+    userData.value = response.data.users
+    stats.value = {
+      totalUsers: response.totalRecord,
+      activeUsers: response.data.active,
+      pendingInvites: response.data.pending,
+    }
+  } catch (error) {
+    message.error('Failed to load user data')
+    console.error('Error loading user data:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadUserData()
+})
 
 // Compute which component to show based on selected menu item
 const currentComponent = computed(() => {
@@ -33,16 +70,9 @@ const currentComponent = computed(() => {
   }
 })
 
-// Mock data for statistics
-const stats = ref({
-  totalUsers: 256,
-  activeUsers: 198,
-  pendingInvites: 15,
-})
-
-// Mock data for user table
+// Columns for user table
 const userColumns = [
-  { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Name', dataIndex: 'username', key: 'username' },
   { title: 'Email', dataIndex: 'email', key: 'email' },
   { title: 'Role', dataIndex: 'role', key: 'role' },
   {
@@ -56,27 +86,6 @@ const userColumns = [
   { title: 'Actions', key: 'actions', slots: { customRender: 'actions' } },
 ]
 
-const userData = ref([
-  {
-    key: '1',
-    name: 'John Smith',
-    email: 'john.smith@example.com',
-    role: 'Admin',
-    status: 'Active',
-    lastLogin: '2025-06-14',
-    contributions: 45,
-  },
-  {
-    key: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah.j@example.com',
-    role: 'Editor',
-    status: 'Pending',
-    lastLogin: '2025-06-13',
-    contributions: 32,
-  },
-])
-
 // Handler functions for table actions
 const handleEdit = (record: (typeof userData.value)[0]) => {
   console.log('Edit user:', record)
@@ -86,16 +95,16 @@ const handleEdit = (record: (typeof userData.value)[0]) => {
 const handleDelete = (record: (typeof userData.value)[0]) => {
   Modal.confirm({
     title: 'Delete User',
-    content: `Are you sure you want to delete ${record.name}?`,
+    content: `Are you sure you want to delete ${record.username}?`,
     okText: 'Yes',
     okType: 'danger',
     cancelText: 'No',
     onOk: () => {
       // Here you would typically make an API call to delete the user
-      userData.value = userData.value.filter((user) => user.key !== record.key)
+      userData.value = userData.value.filter((user) => user.id !== record.id)
       Modal.success({
         title: 'User Deleted',
-        content: `${record.name} has been successfully deleted.`,
+        content: `${record.username} has been successfully deleted.`,
       })
     },
   })
@@ -114,7 +123,6 @@ const handleLogout = () => {
     onOk: async () => {
       try {
         await authService.logout()
-
         // Clear all auth state first
         const authStore = useAuthStore()
         authStore.clearAuth() // Clear Pinia store state
@@ -255,7 +263,8 @@ const handleLogout = () => {
               <a-table
                 :columns="userColumns"
                 :data-source="userData"
-                :pagination="{ pageSize: 10 }"
+                :pagination="{ pageSize: 5 }"
+                :loading="loading"
                 class="user-management-table"
               >
                 <template #status="{ record }">
@@ -268,6 +277,9 @@ const handleLogout = () => {
                   >
                     {{ record.status }}
                   </span>
+                </template>
+                <template #lastLogin="{ text }">
+                  {{ text || 'Never' }}
                 </template>
                 <template #actions="{ record }">
                   <a-space>
