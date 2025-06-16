@@ -41,6 +41,12 @@ export interface OrganizationListResponse {
   data: Organization[]
 }
 
+interface SectorListResponse {
+  success: boolean
+  message: string
+  data: Sector[]
+}
+
 class OrganizationService extends ApiService {
   private orgApi: AxiosInstance
 
@@ -124,6 +130,37 @@ class OrganizationService extends ApiService {
     } catch (error) {
       const axiosError = error as AxiosError
       console.error('[Organization Service] Failed to fetch organizations:', {
+        error: axiosError.message,
+        status: axiosError.response?.status,
+        data: axiosError.response?.data,
+        config: {
+          url: axiosError.config?.url,
+          headers: axiosError.config?.headers,
+          baseURL: axiosError.config?.baseURL,
+        },
+      })
+      throw error
+    }
+  }
+
+  public async getSectors(): Promise<Sector[]> {
+    try {
+      console.debug('[Organization Service] Fetching sectors')
+      const response = await this.orgApi.get<SectorListResponse>(API_ENDPOINTS.sectors.list)
+
+      if (!response.data.success) {
+        console.error('[Organization Service] API returned error:', {
+          message: response.data.message,
+          status: response.status,
+          headers: response.headers,
+        })
+        throw new Error(response.data.message || 'Failed to fetch sectors')
+      }
+
+      return response.data.data
+    } catch (error) {
+      const axiosError = error as AxiosError
+      console.error('[Organization Service] Failed to fetch sectors:', {
         error: axiosError.message,
         status: axiosError.response?.status,
         data: axiosError.response?.data,

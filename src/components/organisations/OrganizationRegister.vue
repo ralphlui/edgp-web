@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Form, Input, Select } from 'ant-design-vue'
+import { ref, onMounted } from 'vue'
+import { Form, Input, Select, message } from 'ant-design-vue'
+import { organizationService } from '@/services/organization.service'
 
 const form = ref({
   organizationName: '',
@@ -11,49 +12,79 @@ const form = ref({
   country: undefined,
   phone: '',
   website: '',
-  size: undefined,
+  size: '',
   industry: undefined,
   contactName: '',
   contactEmail: '',
   contactPhone: '',
 })
 
-const organizationSizes = [
-  { label: '1-20 employees', value: '1-20' },
-  { label: '21-50 employees', value: '21-50' },
-  { label: '51-100 employees', value: '51-100' },
-  { label: '101-500 employees', value: '101-500' },
-  { label: '501-1000 employees', value: '501-1000' },
-  { label: '1000+ employees', value: '1000+' },
-]
+const industries = ref<{ label: string; value: string }[]>([])
+const loadingIndustries = ref(false)
 
-const industries = [
-  { label: 'Technology', value: 'technology' },
-  { label: 'Healthcare', value: 'healthcare' },
-  { label: 'Finance', value: 'finance' },
-  { label: 'Education', value: 'education' },
-  { label: 'Manufacturing', value: 'manufacturing' },
-  { label: 'Retail', value: 'retail' },
-  { label: 'Government', value: 'government' },
-  { label: 'Non-profit', value: 'non-profit' },
-  { label: 'Energy', value: 'energy' },
-  { label: 'Transportation', value: 'transportation' },
-  { label: 'Construction', value: 'construction' },
-  { label: 'Agriculture', value: 'agriculture' },
-  { label: 'Other', value: 'other' },
-]
+const loadIndustries = async () => {
+  try {
+    loadingIndustries.value = true
+    const sectorData = await organizationService.getSectors()
+    industries.value = sectorData.map((sector) => ({
+      label: sector.sectorName,
+      value: sector.sectorID,
+    }))
+  } catch (error) {
+    console.error('Error loading industries:', error)
+    message.error('Failed to load industries')
+  } finally {
+    loadingIndustries.value = false
+  }
+}
 
-// Import country list from a reliable source or define your own
-const countries = [
-  { label: 'United States', value: 'US' },
-  { label: 'United Kingdom', value: 'UK' },
-  { label: 'Canada', value: 'CA' },
-  // ... add more countries
-]
+onMounted(() => {
+  loadIndustries()
+})
 
-const handleSubmit = () => {
-  console.log('Form submitted:', form.value)
-  // TODO: Implement form submission
+// Import countries from constants
+import { COUNTRIES } from '@/constants/countries'
+
+const registering = ref(false)
+
+const handleSubmit = async () => {
+  if (!form.value.industry) {
+    message.error('Please select an industry')
+    return
+  }
+
+  try {
+    registering.value = true
+    // Here you would call your organization registration API
+    // Using organization service to register the organization
+    // TODO: Add organization registration API call
+    console.log('Form ready for submission:', {
+      ...form.value,
+      organizationSize: Number(form.value.size),
+    })
+    message.success('Organization registered successfully!')
+    // Reset form after successful registration
+    form.value = {
+      organizationName: '',
+      taxId: '',
+      streetAddress: '',
+      city: '',
+      postalCode: '',
+      country: undefined,
+      phone: '',
+      website: '',
+      size: '',
+      industry: undefined,
+      contactName: '',
+      contactEmail: '',
+      contactPhone: '',
+    }
+  } catch (error) {
+    console.error('Error registering organization:', error)
+    message.error('Failed to register organization')
+  } finally {
+    registering.value = false
+  }
 }
 </script>
 
@@ -92,7 +123,11 @@ const handleSubmit = () => {
             <Select
               v-model:value="form.country"
               placeholder="Select country"
-              :options="countries"
+              :options="COUNTRIES"
+              show-search
+              :filter-option="
+                (input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              "
               style="width: 100%"
             />
           </Form.Item>
@@ -105,11 +140,13 @@ const handleSubmit = () => {
             <Input v-model:value="form.website" placeholder="Enter website URL" />
           </Form.Item>
 
-          <Form.Item label="Organization Size">
-            <Select
+          <Form.Item label="Organization Size (Number of Employees)">
+            <Input
               v-model:value="form.size"
-              placeholder="Select organization size"
-              :options="organizationSizes"
+              placeholder="Enter number of employees (e.g., 50)"
+              type="number"
+              min="1"
+              :max="999999"
               style="width: 100%"
             />
           </Form.Item>
@@ -119,7 +156,12 @@ const handleSubmit = () => {
               v-model:value="form.industry"
               placeholder="Select industry"
               :options="industries"
+              :loading="loadingIndustries"
               style="width: 100%"
+              show-search
+              :filter-option="
+                (input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              "
             />
           </Form.Item>
 
@@ -142,11 +184,12 @@ const handleSubmit = () => {
 
           <div class="mt-8 w-full">
             <button
-              class="w-full px-6 py-3 text-base text-white rounded-lg"
+              class="w-full px-6 py-3 text-base text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               style="background-color: #4f46e5"
               @click="handleSubmit"
+              :disabled="registering"
             >
-              Register Organization
+              {{ registering ? 'Registering...' : 'Register Organization' }}
             </button>
           </div>
         </Form>
