@@ -53,16 +53,36 @@ const handleSubmit = async () => {
     return
   }
 
+  if (!form.value.organizationName || !form.value.taxId || !form.value.contactName) {
+    message.error('Please fill in all required fields')
+    return
+  }
+
   try {
     registering.value = true
-    // Here you would call your organization registration API
-    // Using organization service to register the organization
-    // TODO: Add organization registration API call
-    console.log('Form ready for submission:', {
-      ...form.value,
-      organizationSize: Number(form.value.size),
+
+    await organizationService.createOrganization({
+      organizationName: form.value.organizationName,
+      uniqueEntityNumber: form.value.taxId,
+      streetAddress: form.value.streetAddress,
+      city: form.value.city,
+      postalCode: form.value.postalCode,
+      country: form.value.country || '',
+      contactNumber: form.value.phone,
+      websiteURL: form.value.website,
+      organizationSize: Number(form.value.size) || 0,
+      sector: {
+        sectorId: form.value.industry,
+      },
+      primaryContactName: form.value.contactName,
+      primaryContactEmail: form.value.contactEmail,
+      primaryContactNumber: form.value.contactPhone,
+      primaryContactPosition: '',
+      address: form.value.streetAddress, // Using street address as the main address field
     })
+
     message.success('Organization registered successfully!')
+
     // Reset form after successful registration
     form.value = {
       organizationName: '',

@@ -47,6 +47,33 @@ interface SectorListResponse {
   data: Sector[]
 }
 
+interface CreateOrganizationRequest {
+  organizationName: string
+  primaryContactName: string
+  primaryContactEmail: string
+  primaryContactNumber: string
+  uniqueEntityNumber: string
+  sector: {
+    sectorId: string
+  }
+  address: string
+  contactNumber: string
+  streetAddress: string
+  city: string
+  postalCode: string
+  country: string
+  websiteURL: string
+  organizationSize: number
+  primaryContactPosition: string
+}
+
+interface CreateOrganizationResponse {
+  success: boolean
+  message: string
+  totalRecord: number
+  data: Organization
+}
+
 class OrganizationService extends ApiService {
   private orgApi: AxiosInstance
 
@@ -161,6 +188,40 @@ class OrganizationService extends ApiService {
     } catch (error) {
       const axiosError = error as AxiosError
       console.error('[Organization Service] Failed to fetch sectors:', {
+        error: axiosError.message,
+        status: axiosError.response?.status,
+        data: axiosError.response?.data,
+        config: {
+          url: axiosError.config?.url,
+          headers: axiosError.config?.headers,
+          baseURL: axiosError.config?.baseURL,
+        },
+      })
+      throw error
+    }
+  }
+
+  public async createOrganization(request: CreateOrganizationRequest): Promise<Organization> {
+    try {
+      console.debug('[Organization Service] Creating organization:', request)
+      const response = await this.orgApi.post<CreateOrganizationResponse>(
+        API_ENDPOINTS.organizations.create,
+        request,
+      )
+
+      if (!response.data.success) {
+        console.error('[Organization Service] API returned error:', {
+          message: response.data.message,
+          status: response.status,
+          headers: response.headers,
+        })
+        throw new Error(response.data.message || 'Failed to create organization')
+      }
+
+      return response.data.data
+    } catch (error) {
+      const axiosError = error as AxiosError
+      console.error('[Organization Service] Failed to create organization:', {
         error: axiosError.message,
         status: axiosError.response?.status,
         data: axiosError.response?.data,
