@@ -48,6 +48,6 @@ export const API_ENDPOINTS: ApiEndpoints = {
     delete: '/orgs',
   },
   sectors: {
-    list: '/sectors',
+    list: '/orgs/sectors',
   },
 }
