@@ -173,7 +173,9 @@ class OrganizationService extends ApiService {
   public async getSectors(): Promise<Sector[]> {
     try {
       console.debug('[Organization Service] Fetching sectors')
-      const response = await this.orgApi.get<SectorListResponse>(API_ENDPOINTS.sectors.list)
+      const response = await this.orgApi.get<SectorListResponse>(
+        `${API_ENDPOINTS.sectors.list}?noPagination=true`,
+      )
 
       if (!response.data.success) {
         console.error('[Organization Service] API returned error:', {

@@ -26,10 +26,12 @@ const loadIndustries = async () => {
   try {
     loadingIndustries.value = true
     const sectorData = await organizationService.getSectors()
-    industries.value = sectorData.map((sector) => ({
-      label: sector.sectorName,
-      value: sector.sectorID,
-    }))
+    industries.value = sectorData
+      .map((sector) => ({
+        label: sector.sectorName,
+        value: sector.sectorID, // Using sectorID from response
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)) // Sort alphabetically by sector name
   } catch (error) {
     console.error('Error loading industries:', error)
     message.error('Failed to load industries')
