@@ -1,6 +1,36 @@
 import { ApiService } from './base-api.service'
 import { API_ENDPOINTS } from '@/config/api.config'
 
+interface CompleteRegistrationRequest {
+  email: string
+  username: string
+  password: string
+  userInvitationtoken: string
+}
+
+interface CompleteRegistrationResponse {
+  success: boolean
+  message: string
+  totalRecord: number
+  data: {
+    userID: string
+    email: string
+    username: string
+    role: {
+      roleId: string
+      roleName: string
+      roleDescription: string
+      status: boolean
+      createdDate: string
+      createdBy: string
+      updatedDate: string
+      updatedBy: string
+    }
+    active: boolean
+    verified: boolean
+  }
+}
+
 export interface UserListResponse {
   success: boolean
   message: string
@@ -61,6 +91,28 @@ class UserService extends ApiService {
       return response.data
     } catch (error) {
       console.error('UserService: Failed to invite user:', error)
+      throw error
+    }
+  }
+
+  public async completeRegistration(
+    request: CompleteRegistrationRequest,
+  ): Promise<CompleteRegistrationResponse> {
+    try {
+      console.debug('UserService: Completing registration:', { email: request.email })
+      const response = await this.api.post<CompleteRegistrationResponse>(
+        API_ENDPOINTS.users.completeRegistration,
+        request,
+      )
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to complete registration')
+      }
+
+      console.debug('UserService: Successfully completed registration')
+      return response.data
+    } catch (error) {
+      console.error('UserService: Failed to complete registration:', error)
       throw error
     }
   }
