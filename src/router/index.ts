@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 import HomeView from '../views/HomeView.vue'
 import PasswordResetView from '../views/PasswordResetView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import InvitationVerifyView from '../views/InvitationVerifyView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,6 +23,12 @@ const router = createRouter({
       name: 'dashboard',
       component: DashboardView,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/invitation/:token',
+      name: 'invitation-verify',
+      component: InvitationVerifyView,
+      props: true,
     },
   ],
 })
