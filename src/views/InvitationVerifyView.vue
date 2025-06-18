@@ -11,12 +11,17 @@ const registering = ref(false)
 
 const form = ref({
   email: '',
+  username: '',
   password: '',
   confirmPassword: '',
 })
 
 const formRules: Record<string, Rule[]> = {
   email: [{ required: true, message: 'Please input your email' }],
+  username: [
+    { required: true, message: 'Please input your username' },
+    { min: 3, message: 'Username must be at least 3 characters' },
+  ],
   password: [
     { required: true, message: 'Please input your password' },
     { min: 8, message: 'Password must be at least 8 characters' },
@@ -45,7 +50,7 @@ const handleSubmit = async () => {
 
     await userService.completeRegistration({
       email: form.value.email,
-      username: form.value.email, // Using email as username
+      username: form.value.username,
       password: form.value.password,
       userInvitationtoken: token,
     })
@@ -75,6 +80,10 @@ const handleSubmit = async () => {
         <Form layout="vertical" :rules="formRules" @finish="handleSubmit">
           <Form.Item name="email" label="Email" :rules="formRules.email">
             <Input v-model:value="form.email" placeholder="Enter your email" />
+          </Form.Item>
+
+          <Form.Item name="username" label="Username" :rules="formRules.username">
+            <Input v-model:value="form.username" placeholder="Choose your username" />
           </Form.Item>
 
           <Form.Item name="password" label="Password" :rules="formRules.password">
