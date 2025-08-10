@@ -1,5 +1,5 @@
 import { ApiService } from './base-api.service'
-import axios, { type AxiosInstance, type AxiosError } from 'axios'
+import axios, { type AxiosInstance, type AxiosError, type AxiosResponse } from 'axios'
 import { API_ENDPOINTS } from '@/config/api.config'
 
 interface Sector {
@@ -39,6 +39,13 @@ export interface OrganizationListResponse {
   message: string
   totalRecord: number
   data: Organization[]
+}
+
+export interface OrganizationDetailResponse {
+  success: boolean
+  message: string
+  totalRecord: number
+  data: Organization
 }
 
 interface SectorListResponse {
@@ -94,24 +101,18 @@ class OrganizationService extends ApiService {
     this.orgApi.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('access_token')
-        console.debug('[Organization Service] Request interceptor:', {
+
+        console.debug('[Organization Service] Request interceptor - before processing:', {
           url: config.url,
+          method: config.method,
           hasToken: !!token,
           tokenLength: token?.length,
           tokenPreview: token ? `${token.substring(0, 20)}...` : 'no token',
-          headers: {
-            current: config.headers,
-            contentType: config.headers['Content-Type'],
-            accept: config.headers['Accept'],
-          },
+          incomingHeaders: { ...config.headers },
         })
 
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
-          console.debug('[Organization Service] Authorization header set:', {
-            header: `Bearer ${token.substring(0, 20)}...`,
-            length: token.length,
-          })
         } else {
           console.warn('[Organization Service] No access token found in localStorage')
           console.debug('[Organization Service] localStorage contents:', {
@@ -120,6 +121,15 @@ class OrganizationService extends ApiService {
             refreshToken: !!localStorage.getItem('refresh_token'),
           })
         }
+
+        console.debug('[Organization Service] Request interceptor - after processing:', {
+          url: config.url,
+          method: config.method,
+          finalHeaders: { ...config.headers },
+          hasAuthorization: !!config.headers.Authorization,
+          hasXOrgId: !!config.headers['X-Org-Id'],
+        })
+
         return config
       },
       (error) => {
@@ -232,6 +242,80 @@ class OrganizationService extends ApiService {
           headers: axiosError.config?.headers,
           baseURL: axiosError.config?.baseURL,
         },
+      })
+      throw error
+    }
+  }
+
+  public async getOrganizationDetails(organizationId: string): Promise<Organization> {
+    try {
+      console.debug('[Organization Service] Fetching organization details:', {
+        organizationId,
+        endpoint: API_ENDPOINTS.organizations.detail,
+        fullUrl: this.orgApi.defaults.baseURL + API_ENDPOINTS.organizations.detail,
+        hasToken: !!localStorage.getItem('access_token'),
+      })
+
+      // First try with query parameter to avoid CORS issues
+      let response: AxiosResponse<OrganizationDetailResponse>
+      try {
+        console.debug('[Organization Service] Trying query parameter approach...')
+        response = await this.orgApi.get<OrganizationDetailResponse>(
+          `${API_ENDPOINTS.organizations.detail}?orgId=${organizationId}`,
+        )
+      } catch (queryError: unknown) {
+        console.debug(
+          '[Organization Service] Query parameter failed, trying header approach...',
+          queryError instanceof Error ? queryError.message : 'Unknown error',
+        )
+
+        // Fallback to header approach if query parameter doesn't work
+        response = await this.orgApi.get<OrganizationDetailResponse>(
+          API_ENDPOINTS.organizations.detail,
+          {
+            headers: {
+              'X-Org-Id': organizationId,
+            },
+          },
+        )
+      }
+
+      if (!response.data.success) {
+        console.error('[Organization Service] API returned error:', {
+          message: response.data.message,
+          status: response.status,
+          headers: response.headers,
+        })
+        throw new Error(response.data.message || 'Failed to fetch organization details')
+      }
+
+      return response.data.data
+    } catch (error) {
+      const axiosError = error as AxiosError
+      console.error('[Organization Service] Failed to fetch organization details:', {
+        error: axiosError.message,
+        status: axiosError.response?.status,
+        data: axiosError.response?.data,
+        config: {
+          url: axiosError.config?.url,
+          method: axiosError.config?.method,
+          headers: axiosError.config?.headers,
+          baseURL: axiosError.config?.baseURL,
+          fullUrl:
+            axiosError.config?.baseURL && axiosError.config?.url
+              ? axiosError.config.baseURL + axiosError.config.url
+              : 'Unknown URL',
+        },
+        isNetworkError: axiosError.code === 'NETWORK_ERROR' || !axiosError.response,
+        possibleCauses:
+          axiosError.code === 'NETWORK_ERROR' || !axiosError.response
+            ? [
+                'Backend server at http://localhost:8082 is not running',
+                'CORS policy blocking the request',
+                'Network connectivity issues',
+                'Firewall blocking the connection',
+              ]
+            : ['API endpoint error', 'Authentication issues', 'Server error'],
       })
       throw error
     }
