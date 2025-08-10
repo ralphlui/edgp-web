@@ -13,6 +13,7 @@ import dashboardIcon from '@/assets/dashboardIcon.png'
 import InviteNewUser from '@/components/auth/InviteNewUser.vue'
 import DataDashboard from '@/components/dataDashboard/DataDashboard.vue'
 import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
+import OrganizationList from '@/components/organisations/OrganizationList.vue'
 import { authService } from '@/services/auth.service'
 import { userService } from '@/services/user.service'
 import { useAuthStore } from '@/stores/auth'
@@ -20,6 +21,7 @@ import type { UserListResponse } from '@/services/user.service'
 
 const collapsed = ref(false)
 const selectedKeys = ref(['2']) // Default to User Onboarding
+const organizationView = ref('list') // 'list' or 'register'
 const inviteModalRef = ref()
 const router = useRouter()
 
@@ -64,11 +66,20 @@ const currentComponent = computed(() => {
     case '1':
       return 'DataDashboard'
     case '3':
-      return 'OrganizationRegister'
+      return 'Organization'
     default:
       return 'UserOnboarding'
   }
 })
+
+// Add methods to switch between organization views
+const switchToOrganizationRegister = () => {
+  organizationView.value = 'register'
+}
+
+const switchToOrganizationList = () => {
+  organizationView.value = 'list'
+}
 
 // Columns for user table
 const userColumns = [
@@ -201,7 +212,7 @@ const handleLogout = () => {
             <template #icon>
               <BankOutlined />
             </template>
-            <span>Organization Register</span>
+            <span>Organization Management</span>
           </Menu.Item>
           <Menu.Divider class="my-2" />
           <Menu.Item key="logout" @click="handleLogout">
@@ -219,7 +230,19 @@ const handleLogout = () => {
       <Layout.Content class="p-6" style="background: #e5e7eb">
         <!-- Conditional rendering based on selected menu item -->
         <DataDashboard v-if="currentComponent === 'DataDashboard'" />
-        <OrganizationRegister v-else-if="currentComponent === 'OrganizationRegister'" />
+
+        <!-- Organization section with nested views -->
+        <template v-else-if="currentComponent === 'Organization'">
+          <OrganizationList
+            v-if="organizationView === 'list'"
+            @register-click="switchToOrganizationRegister"
+          />
+          <OrganizationRegister
+            v-else
+            @back-click="switchToOrganizationList"
+            @register-success="switchToOrganizationList"
+          />
+        </template>
 
         <template v-else>
           <div class="flex justify-between items-center mb-6">

@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import { Form, Input, Select, message } from 'ant-design-vue'
 import { organizationService } from '@/services/organization.service'
 
+const emit = defineEmits(['back-click', 'register-success'])
+
 const form = ref({
   organizationName: '',
   taxId: '',
@@ -48,6 +50,11 @@ onMounted(() => {
 import { COUNTRIES } from '@/constants/countries'
 
 const registering = ref(false)
+
+// Add method to handle back button click
+const handleBack = () => {
+  emit('back-click')
+}
 
 const handleSubmit = async () => {
   if (!form.value.industry) {
@@ -101,6 +108,9 @@ const handleSubmit = async () => {
       contactEmail: '',
       contactPhone: '',
     }
+
+    // Emit success event to switch back to list view
+    emit('register-success')
   } catch (error) {
     console.error('Error registering organization:', error)
     message.error('Failed to register organization')
@@ -113,7 +123,15 @@ const handleSubmit = async () => {
 <template>
   <div class="p-6" style="background: #e5e7eb">
     <div class="max-w-4xl mx-auto">
-      <h1 class="text-2xl font-bold mb-8">Organization Registration</h1>
+      <div class="flex items-center mb-8">
+        <button
+          class="mr-4 px-3 py-1 border rounded hover:bg-gray-100 flex items-center"
+          @click="handleBack"
+        >
+          ← Back
+        </button>
+        <h1 class="text-2xl font-bold">Organization Registration</h1>
+      </div>
 
       <div class="bg-white rounded-lg shadow-lg p-8">
         <Form layout="vertical">

@@ -20,6 +20,7 @@ interface ApiEndpoints {
     create: string
     update: string
     delete: string
+    detail: string
   }
   sectors: {
     list: string
@@ -48,6 +49,7 @@ export const API_ENDPOINTS: ApiEndpoints = {
     create: '/orgs',
     update: '/orgs',
     delete: '/orgs',
+    detail: '/orgs/my-organization',
   },
   sectors: {
     list: '/orgs/sectors',
