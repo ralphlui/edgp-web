@@ -6,6 +6,7 @@ import {
   UserOutlined,
   BankOutlined,
   LogoutOutlined,
+  FileProtectOutlined,
 } from '@ant-design/icons-vue'
 import { Layout, Menu, Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
@@ -14,6 +15,7 @@ import InviteNewUser from '@/components/auth/InviteNewUser.vue'
 import DataDashboard from '@/components/dataDashboard/DataDashboard.vue'
 import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
 import OrganizationList from '@/components/organisations/OrganizationList.vue'
+import PolicyList from '@/components/policyManagement/PolicyList.vue'
 import { authService } from '@/services/auth.service'
 import { userService } from '@/services/user.service'
 import { useAuthStore } from '@/stores/auth'
@@ -67,6 +69,8 @@ const currentComponent = computed(() => {
       return 'DataDashboard'
     case '3':
       return 'Organization'
+    case '4':
+      return 'PolicyList'
     default:
       return 'UserOnboarding'
   }
@@ -214,6 +218,12 @@ const handleLogout = () => {
             </template>
             <span>Organization Management</span>
           </Menu.Item>
+          <Menu.Item key="4">
+            <template #icon>
+              <FileProtectOutlined />
+            </template>
+            <span>Policy Management</span>
+          </Menu.Item>
           <Menu.Divider class="my-2" />
           <Menu.Item key="logout" @click="handleLogout">
             <template #icon>
@@ -230,6 +240,9 @@ const handleLogout = () => {
       <Layout.Content class="p-6" style="background: #e5e7eb">
         <!-- Conditional rendering based on selected menu item -->
         <DataDashboard v-if="currentComponent === 'DataDashboard'" />
+
+        <!-- Policy List section -->
+        <PolicyList v-else-if="currentComponent === 'PolicyList'" />
 
         <!-- Organization section with nested views -->
         <template v-else-if="currentComponent === 'Organization'">
