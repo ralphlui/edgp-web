@@ -24,6 +24,27 @@ export interface Policy {
   lastUpdated?: string
 }
 
+export interface CreatePolicyRequest {
+  policyName: string
+  domainName: string
+  rules: {
+    appliesToField: string
+    ruleName: string
+    parameters: Record<string, unknown>
+  }[]
+  description: string
+  isPublished: boolean
+  createdBy: string
+  organizationId: string
+  [key: string]: unknown
+}
+
+export interface CreatePolicyResponse {
+  success: boolean
+  message: string
+  data: Policy
+}
+
 export interface PolicyListResponse {
   success: boolean
   message: string
@@ -60,9 +81,19 @@ class PolicyService extends ApiService {
     }
   }
 
-  async createPolicy(policy: Partial<Policy>): Promise<Policy> {
-    const response = await this.post<Policy>(API_ENDPOINTS.policies.create, policy)
-    return response.data
+  async createPolicy(policyData: CreatePolicyRequest): Promise<CreatePolicyResponse> {
+    try {
+      console.log('Creating policy with data:', policyData)
+      const response = await this.post<CreatePolicyResponse>(
+        API_ENDPOINTS.policies.create,
+        policyData,
+      )
+      console.log('Create policy response:', response)
+      return response.data
+    } catch (error) {
+      console.error('Create policy error:', error)
+      throw error
+    }
   }
 
   async updatePolicy(policyId: string, policy: Partial<Policy>): Promise<Policy> {

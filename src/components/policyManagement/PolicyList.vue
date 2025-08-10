@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { Table, Button, message, Space } from 'ant-design-vue'
+import { Table, Button, message, Space, Modal } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import { policyService, type Policy } from '@/services/policy.service'
+import CreatePolicyForm from './CreatePolicyForm.vue'
 
 // Component state
 const loading = ref(false)
 const policies = ref<Policy[]>([])
+const showCreateForm = ref(false)
 
 // Current date for Last Updated column
 const currentDate = ref('')
@@ -108,7 +110,17 @@ const formatDate = (dateString?: string) => {
 
 // Action handlers
 const handleCreatePolicy = () => {
-  message.info('Create Policy functionality will be implemented')
+  showCreateForm.value = true
+}
+
+const handleCreateSuccess = () => {
+  showCreateForm.value = false
+  loadPolicies() // Reload the policies list
+  message.success('Policy created successfully')
+}
+
+const handleCreateClose = () => {
+  showCreateForm.value = false
 }
 
 const handleEdit = (policy: Policy) => {
@@ -262,6 +274,17 @@ onMounted(() => {
         </Table>
       </div>
     </div>
+
+    <!-- Create Policy Form Modal -->
+    <Modal
+      v-model:open="showCreateForm"
+      :footer="null"
+      width="900px"
+      :mask-closable="false"
+      :destroy-on-close="true"
+    >
+      <CreatePolicyForm @close="handleCreateClose" @success="handleCreateSuccess" />
+    </Modal>
   </div>
 </template>
 
