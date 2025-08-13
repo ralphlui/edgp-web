@@ -350,11 +350,18 @@ const selectedRuleNames = ref<string[]>([])
 const loadingTemplateFields = ref(false)
 const availableTemplateFields = ref<string[]>([])
 
+// Local interface for form rules (supports multi-select fields)
+interface FormRule {
+  appliesToField: string[] // Multi-select field array in form
+  ruleName: string
+  parameters: Record<string, unknown>
+}
+
 // Form data
 const formData = ref({
   policyName: '',
   domainName: '',
-  rules: [] as CreatePolicyRequest['rules'],
+  rules: [] as FormRule[],
   description: '',
   isPublished: false,
 })
@@ -659,15 +666,26 @@ const handleSubmit = async () => {
   try {
     submitting.value = true
 
+    // Transform form rules to API format - convert arrays to comma-separated strings
+    const transformedRules: CreatePolicyRequest['rules'] = formData.value.rules
+      .filter((rule) => Array.isArray(rule.appliesToField) && rule.appliesToField.length > 0) // Only include rules with fields
+      .map((rule) => ({
+        appliesToField: rule.appliesToField.join(', '), // Convert array to comma-separated string
+        ruleName: rule.ruleName,
+        parameters: rule.parameters,
+      }))
+
     const payload: CreatePolicyRequest = {
       policyName: formData.value.policyName,
       domainName: formData.value.domainName,
-      rules: formData.value.rules,
+      rules: transformedRules,
       description: formData.value.description,
       isPublished: formData.value.isPublished,
       createdBy: authStore.user?.userID || 'unknown',
       organizationId: 'c7ddfeaa-a005-4eb2-b7d1-ec5091d5a5bb', // Default organization ID for now
     }
+
+    console.log('Transformed payload for API:', JSON.stringify(payload, null, 2))
 
     await policyService.createPolicy(payload)
 
