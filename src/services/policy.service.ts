@@ -4,7 +4,7 @@ import { ApiService } from './base-api.service'
 export interface PolicyRule {
   ruleId: string
   ruleName: string
-  appliesToField: string
+  appliesToField: string | string[] // Support both single field and multiple fields
   description: string | null
   parameters: Record<string, string | number | boolean>
 }
@@ -22,6 +22,27 @@ export interface Policy {
   createdAt?: string
   updatedAt?: string
   lastUpdated?: string
+}
+
+export interface CreatePolicyRequest {
+  policyName: string
+  domainName: string
+  rules: {
+    appliesToField: string | string[] // Support both single field and multiple fields
+    ruleName: string
+    parameters: Record<string, unknown>
+  }[]
+  description: string
+  isPublished: boolean
+  createdBy: string
+  organizationId: string
+  [key: string]: unknown
+}
+
+export interface CreatePolicyResponse {
+  success: boolean
+  message: string
+  data: Policy
 }
 
 export interface PolicyListResponse {
@@ -60,9 +81,19 @@ class PolicyService extends ApiService {
     }
   }
 
-  async createPolicy(policy: Partial<Policy>): Promise<Policy> {
-    const response = await this.post<Policy>(API_ENDPOINTS.policies.create, policy)
-    return response.data
+  async createPolicy(policyData: CreatePolicyRequest): Promise<CreatePolicyResponse> {
+    try {
+      console.log('Creating policy with data:', policyData)
+      const response = await this.post<CreatePolicyResponse>(
+        API_ENDPOINTS.policies.create,
+        policyData,
+      )
+      console.log('Create policy response:', response)
+      return response.data
+    } catch (error) {
+      console.error('Create policy error:', error)
+      throw error
+    }
   }
 
   async updatePolicy(policyId: string, policy: Partial<Policy>): Promise<Policy> {

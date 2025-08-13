@@ -1,0 +1,119 @@
+﻿Field Name,Description,Data Type,Length,Example/Notes
+MANDT,Client,CLNT,3,100
+MATNR,Material Number,CHAR,18,F-1000
+ERSDA,Created On,DATS,8,20230615
+ERNAM,Created By,CHAR,12,USER123
+LAEDA,Last Changed On,DATS,8,20240120
+AENAM,Changed By,CHAR,12,USER456
+VPSTA,Maintenance Status,CHAR,15,A (Active)
+PSTAT,Maintenance Status (Internal),CHAR,15,B (Blocked)
+LVORM,Deletion Flag,CHAR,1,X (Marked for deletion)
+MTART,Material Type,CHAR,4,"FERT (Finished goods), ROH (Raw)"
+MBRSH,Industry Sector,CHAR,1,"A (Plant/Animal), B (Plant)"
+MATKL,Material Group,CHAR,9,ELECTRONICS
+BISMT,Old Material Number,CHAR,18,OLD-1000
+MEINS,Base Unit of Measure,UNIT,3,"PC, KG"
+BSTME,Order Unit,UNIT,3,"BOX, PAL"
+ZEINR,Document Number,CHAR,22,DOC-12345
+ZEIAR,Document Type,CHAR,3,TDS (Technical Data Sheet)
+ZEIVR,Document Version,CHAR,2,1
+ZEIFO,Document Part,CHAR,3,1
+AESZN,Document Change Number,CHAR,8,CHG-678
+BLATT,Page Number of Document,CHAR,3,1
+BLANZ,Number of Sheets,NUMC,3,10
+FERTH,Production Storage Location,CHAR,4,WH01
+FORMT,Page Format,CHAR,4,A4
+GROES,Size/Dimensions,CHAR,32,10x20x30 cm
+WRKST,Basic Material,CHAR,48,STEEL
+NORMT,Industry Standard,CHAR,18,ISO-9001
+LABOR,Laboratory/Design Office,CHAR,3,LAB5
+EKWSL,Purchasing Value Key,CHAR,10,PVK-100
+BRGEW,Gross Weight,QUAN,15,1.5
+GEWEI,Weight Unit,UNIT,3,"KG, G"
+VOLUM,Volume,QUAN,15,0.5
+VOLEH,Volume Unit,UNIT,3,"M3, L"
+BEHVO,Container Requirements,CHAR,2,CR (Climate-Controlled)
+RAUBE,Storage Conditions,CHAR,2,DRY
+TEMPB,Temperature Requirements,CHAR,2,15 (15°C)
+DISST,Low-Level Code (LLC),NUMC,3,1
+TRAGR,Transportation Group,CHAR,4,TP01
+STOFF,Hazardous Material Number,CHAR,8,HAZ-123
+SPART,Division,CHAR,2,01 (Sales Division)
+KUNNR,Customer,CHAR,10,C-1000
+EANNR,EAN (European Article Number),CHAR,13,1.23457E+12
+WESCH,Quantity for Catch Weight Unit,QUAN,13,5
+BWVOR,Procurement Rule,CHAR,1,E (External Procurement)
+BWSCL,Source of Supply,CHAR,1,2 (Stock Transfer)
+SAISO,Season Category,CHAR,2,SU (Summer)
+ETIAR,Label Type,CHAR,2,LT (Logistics Label)
+ETIFO,Label Form,CHAR,4,A5
+ENTAR,Unit for Label Type,UNIT,3,EA (Each)
+EAN11,Global Trade Item Number (GTIN),CHAR,18,123456789012345678
+NUMTP,GTIN Category,CHAR,2,02 (Variable Weight)
+LAENG,Length,DEC,13,10
+BREIT,Width,DEC,13,5
+HOEHE,Height,DEC,13,2
+MEABM,Unit for Dimensions,UNIT,3,CM
+PRDHA,Product Hierarchy,CHAR,18,PROD_HIER_001
+AEKLK,Stock Transfer Allowed,CHAR,1,X (Yes)
+CADKZ,CAD Indicator,CHAR,1,X (CAD Data Exists)
+QMPUR,QM Inspection Type,CHAR,1,1 (Inspection Required)
+ERGEW,Allowed Packaging Weight,QUAN,13,20
+ERGEI,Unit for Packaging Weight,UNIT,3,KG
+ERVOL,Allowed Packaging Volume,QUAN,13,5
+ERVOE,Unit for Packaging Volume,UNIT,3,M3
+GEWTO,Weight Tolerance,CHAR,3,10%
+VOLTO,Volume Tolerance,CHAR,3,5%
+VABME,Variable Purchase Order Unit,CHAR,1,X (Allowed)
+KZREV,Revision Level Assigned,CHAR,1,X (Yes)
+KZKUP,Configurable Material,CHAR,1,X (Yes)
+KZNFM,Follow-Up Material,CHAR,1,X (Yes)
+COOEX,Country of Origin,CHAR,3,"US, DE"
+MMSTA,Plant-Specific Status,CHAR,2,A0 (Active)
+MAABC,ABC Indicator,CHAR,1,A (High Consumption)
+AUSDT,Obsolete Since,DATS,8,20251231
+NFMAT,Follow-Up Material Number,CHAR,18,F-2000
+SAISJ,Season Year,CHAR,4,2025
+PLGTP,Price Group,CHAR,2,1
+MLGUT,Empties Material,CHAR,1,X (Yes)
+EXTWG,External Material Group,CHAR,18,EXT_GROUP_01
+SATNR,Cross-Plant Configurable Material,CHAR,18,CONFIG-100
+ATTYP,Material Category,CHAR,1,K (Configurable Material)
+STFAK,Stacking Factor,DEC,5,1.5
+MAGRV,Material Group Packaging,CHAR,4,PKG1
+BEGRU,Authorization Group,CHAR,4,AUTH_GRP1
+DATAB,Valid From,DATS,8,20250101
+LIQDT,Deletion Date,DATS,8,20261231
+SAISL,Season Language,LANG,1,E (English)
+TXJCD,Tax Jurisdiction,CHAR,15,TX-US-CA
+TAXIM,Tax Classification,CHAR,1,1 (Standard Tax)
+PROFL,Dangerous Goods Profile,CHAR,3,DG1
+IHIVI,Shelf Life Indicator,CHAR,1,X (Yes)
+ILOOS,Dangerous Goods (Packaged),CHAR,1,X (Yes)
+SERLV,Serial Number Level,CHAR,1,B (Batch-Level)
+KZGVH,Generic Material,CHAR,1,X (Yes)
+XGCHP,GHP Indicator,CHAR,1,X (Good Handling Practice)
+KZEFF,Material Is Batch Managed,CHAR,1,X (Yes)
+COMPL,Material Completion Status,CHAR,1,C (Complete)
+IPRKZ,Period Indicator for Shelf Life,CHAR,1,D (Days)
+RDMHD,Minimum Remaining Shelf Life,DEC,5,30 (Days)
+PRZUS,Usage Indicator,CHAR,1,P (Production)
+MTPOS,Item Category Group,CHAR,4,NORM (Standard Items)
+BFLME,Material Usage,CHAR,1,P (Production)
+MATFI,Material Is Fixed,CHAR,1,X (Yes)
+CMREL,Status Configurable Material,CHAR,10,REL (Released)
+BBTYP,Procurement Type,CHAR,1,F (Production)
+SLED_BBD,Shelf Life Expiration Date,DATS,8,20251231
+GTIN_VAR,GTIN Variant,CHAR,2,1
+GENNR,Generic Material Number,CHAR,18,GEN-1000
+RMATP,Reference Material,CHAR,18,REF-500
+GDS_RELEVANT,GDS-Relevant Material,CHAR,1,X (Yes)
+WEORA,Goods Receipt Processing Time,QUAN,3,24 (Hours)
+HUTYP,HU Type,CHAR,10,HU01
+PILFERABLE,Pilferable Item,CHAR,1,X (Yes)
+WHSTC,Warehouse Storage Condition,CHAR,3,H01
+WHMATGR,Warehouse Material Group,CHAR,3,WMG1
+HNDLCODE,Handling Indicator,CHAR,4,FLC (Fragile/Liquid)
+HAZMAT,Hazardous Material,CHAR,1,X (Yes)
+HUTYP_DEFAULT,Default HU Type,CHAR,10,HU_STD
+MCRUE,Material Is MRP-Relevant,CHAR,1,X (Yes)
