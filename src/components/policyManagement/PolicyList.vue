@@ -4,11 +4,14 @@ import { Table, Button, message, Space, Modal } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import { policyService, type Policy } from '@/services/policy.service'
 import CreatePolicyForm from './CreatePolicyForm.vue'
+import PolicyDetailView from './PolicyDetailView.vue'
 
 // Component state
 const loading = ref(false)
 const policies = ref<Policy[]>([])
 const showCreateForm = ref(false)
+const showViewModal = ref(false)
+const viewingPolicyId = ref<string>('')
 
 // Current date for Last Updated column
 const currentDate = ref('')
@@ -129,8 +132,14 @@ const handleEdit = (policy: Policy) => {
 }
 
 const handleView = (policy: Policy) => {
-  console.log('View policy:', policy.policyName)
-  message.info(`View ${policy.policyName} functionality will be implemented`)
+  console.log('Viewing policy:', policy.policyName, 'ID:', policy.policyId)
+  viewingPolicyId.value = policy.policyId
+  showViewModal.value = true
+}
+
+const handleViewClose = () => {
+  showViewModal.value = false
+  viewingPolicyId.value = ''
 }
 
 // Load data on component mount
@@ -285,6 +294,9 @@ onMounted(() => {
     >
       <CreatePolicyForm @close="handleCreateClose" @success="handleCreateSuccess" />
     </Modal>
+
+    <!-- Policy Detail View -->
+    <PolicyDetailView :open="showViewModal" :policy-id="viewingPolicyId" @close="handleViewClose" />
   </div>
 </template>
 
