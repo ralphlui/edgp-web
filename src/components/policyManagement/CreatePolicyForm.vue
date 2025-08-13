@@ -682,7 +682,6 @@ const handleSubmit = async () => {
       description: formData.value.description,
       isPublished: formData.value.isPublished,
       createdBy: authStore.user?.userID || 'unknown',
-      organizationId: 'c7ddfeaa-a005-4eb2-b7d1-ec5091d5a5bb', // Default organization ID for now
     }
 
     console.log('Transformed payload for API:', JSON.stringify(payload, null, 2))
