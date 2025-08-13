@@ -31,6 +31,7 @@ interface ApiEndpoints {
     create: string
     update: string
     delete: string
+    myPolicy: string
   }
 }
 
@@ -67,5 +68,6 @@ export const API_ENDPOINTS: ApiEndpoints = {
     create: '/policy',
     update: '/policy',
     delete: '/policy',
+    myPolicy: '/policy/my-policy',
   },
 }

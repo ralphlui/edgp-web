@@ -44,6 +44,13 @@ export interface CreatePolicyResponse {
   data: Policy
 }
 
+export interface ViewPolicyResponse {
+  success: boolean
+  message: string
+  totalRecord: number
+  data: Policy
+}
+
 export interface PolicyListResponse {
   success: boolean
   message: string
@@ -91,6 +98,22 @@ class PolicyService extends ApiService {
       return response.data
     } catch (error) {
       console.error('Create policy error:', error)
+      throw error
+    }
+  }
+
+  async viewPolicy(policyId: string): Promise<ViewPolicyResponse> {
+    try {
+      console.log('Viewing policy with ID:', policyId)
+      const response = await this.api.get<ViewPolicyResponse>(API_ENDPOINTS.policies.myPolicy, {
+        headers: {
+          'X-Policy-Id': policyId,
+        },
+      })
+      console.log('View policy response:', response)
+      return response.data
+    } catch (error) {
+      console.error('View policy error:', error)
       throw error
     }
   }
