@@ -5,6 +5,7 @@ import { PlusOutlined } from '@ant-design/icons-vue'
 import { policyService, type Policy } from '@/services/policy.service'
 import CreatePolicyForm from './CreatePolicyForm.vue'
 import PolicyDetailView from './PolicyDetailView.vue'
+import EditPolicyForm from './EditPolicyForm.vue'
 
 // Component state
 const loading = ref(false)
@@ -12,6 +13,8 @@ const policies = ref<Policy[]>([])
 const showCreateForm = ref(false)
 const showViewModal = ref(false)
 const viewingPolicyId = ref<string>('')
+const showEditForm = ref(false)
+const editingPolicy = ref<Policy | null>(null)
 
 // Current date for Last Updated column
 const currentDate = ref('')
@@ -128,7 +131,8 @@ const handleCreateClose = () => {
 
 const handleEdit = (policy: Policy) => {
   console.log('Edit policy:', policy.policyName)
-  message.info(`Edit ${policy.policyName} functionality will be implemented`)
+  editingPolicy.value = policy
+  showEditForm.value = true
 }
 
 const handleView = (policy: Policy) => {
@@ -140,6 +144,18 @@ const handleView = (policy: Policy) => {
 const handleViewClose = () => {
   showViewModal.value = false
   viewingPolicyId.value = ''
+}
+
+const handleEditSuccess = () => {
+  showEditForm.value = false
+  editingPolicy.value = null
+  loadPolicies() // Reload the policies list
+  message.success('Policy updated successfully')
+}
+
+const handleEditClose = () => {
+  showEditForm.value = false
+  editingPolicy.value = null
 }
 
 // Load data on component mount
@@ -297,6 +313,22 @@ onMounted(() => {
 
     <!-- Policy Detail View -->
     <PolicyDetailView :open="showViewModal" :policy-id="viewingPolicyId" @close="handleViewClose" />
+
+    <!-- Edit Policy Form Modal -->
+    <Modal
+      v-model:open="showEditForm"
+      :footer="null"
+      width="800px"
+      :mask-closable="false"
+      :destroy-on-close="true"
+    >
+      <EditPolicyForm
+        v-if="editingPolicy"
+        :policy="editingPolicy"
+        @close="handleEditClose"
+        @success="handleEditSuccess"
+      />
+    </Modal>
   </div>
 </template>
 

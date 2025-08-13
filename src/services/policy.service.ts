@@ -44,6 +44,17 @@ export interface CreatePolicyResponse {
   data: Policy
 }
 
+export interface UpdatePolicyRequest {
+  isPublished: boolean
+  description: string
+}
+
+export interface UpdatePolicyResponse {
+  success: boolean
+  message: string
+  data: Policy
+}
+
 export interface ViewPolicyResponse {
   success: boolean
   message: string
@@ -118,9 +129,27 @@ class PolicyService extends ApiService {
     }
   }
 
-  async updatePolicy(policyId: string, policy: Partial<Policy>): Promise<Policy> {
-    const response = await this.put<Policy>(`${API_ENDPOINTS.policies.update}/${policyId}`, policy)
-    return response.data
+  async updatePolicy(
+    policyId: string,
+    updateData: UpdatePolicyRequest,
+  ): Promise<UpdatePolicyResponse> {
+    try {
+      console.log('Updating policy with ID:', policyId, 'Data:', updateData)
+      const response = await this.api.put<UpdatePolicyResponse>(
+        API_ENDPOINTS.policies.update,
+        updateData,
+        {
+          headers: {
+            'X-Policy-Id': policyId,
+          },
+        },
+      )
+      console.log('Update policy response:', response)
+      return response.data
+    } catch (error) {
+      console.error('Update policy error:', error)
+      throw error
+    }
   }
 
   async deletePolicy(policyId: string): Promise<void> {
