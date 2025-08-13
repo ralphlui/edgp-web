@@ -1,0 +1,83 @@
+﻿Field Name,Description,Data Type,Length
+CLIENT,Client,CLNT,3
+ADDRNUMBER,Address Number,CHAR,10
+DATE_FROM,Valid-From Date,DATS,8
+NATION,International Address Version,CHAR,1
+NAME1,Name Line 1,CHAR,40
+NAME2,Name Line 2,CHAR,40
+NAME3,Name Line 3,CHAR,40
+NAME4,Name Line 4,CHAR,40
+COUNCIL,City District,CHAR,40
+CITY1,City,CHAR,40
+CITY2,District,CHAR,40
+POST_CODE1,Postal Code (City),CHAR,10
+POST_CODE2,Postal Code (PO Box),CHAR,10
+POST_CODE3,Postal Code (Company),CHAR,10
+STREET,Street,CHAR,60
+STR_ABBR,Street Abbreviation,CHAR,2
+HOUSE_NUM1,House Number,CHAR,10
+HOUSE_NUM2,House Number Supplement,CHAR,10
+STR_SUPPL1,Street Supplement 1,CHAR,40
+STR_SUPPL2,Street Supplement 2,CHAR,40
+STR_SUPPL3,Street Supplement 3,CHAR,40
+LOCATION,Location,CHAR,40
+BUILDING,Building,CHAR,20
+FLOOR,Floor,CHAR,10
+ROOMNUMBER,Room Number,CHAR,10
+COUNTRY,Country Key,CHAR,3
+LANGU,Language Key,LANG,1
+REGION,Region (State/Province),CHAR,3
+SORT1,Search Term 1,CHAR,20
+SORT2,Search Term 2,CHAR,20
+TIME_ZONE,Time Zone,CHAR,6
+TAXJURCODE,Tax Jurisdiction,CHAR,15
+ADDR_GROUP,Address Group,CHAR,4
+TITLE,Title/Form of Address,CHAR,15
+COUNTRYISO,ISO Country Code,CHAR,2
+LANGU_ISO,ISO Language Code,CHAR,2
+TEL_NUMBER,Telephone Number,CHAR,30
+TEL_EXTENS,Telephone Extension,CHAR,10
+FAX_NUMBER,Fax Number,CHAR,30
+FAX_EXTENS,Fax Extension,CHAR,10
+STREET_LNG,Street (Long),CHAR,60
+STR_ABBR_LNG,Street Abbreviation (Long),CHAR,4
+HOUSE_NUM_LNG,House Number (Long),CHAR,10
+HOUSE_NUM2_LNG,House Number Supplement (Long),CHAR,10
+STR_SUPPL1_LNG,Street Supplement 1 (Long),CHAR,40
+STR_SUPPL2_LNG,Street Supplement 2 (Long),CHAR,40
+STR_SUPPL3_LNG,Street Supplement 3 (Long),CHAR,40
+LOCATION_LNG,Location (Long),CHAR,40
+BUILDING_LNG,Building (Long),CHAR,20
+FLOOR_LNG,Floor (Long),CHAR,10
+ROOMNUMBER_LNG,Room Number (Long),CHAR,10
+TEL_NUMBER_LNG,Telephone Number (Long),CHAR,30
+TEL_EXTENS_LNG,Telephone Extension (Long),CHAR,10
+FAX_NUMBER_LNG,Fax Number (Long),CHAR,30
+FAX_EXTENS_LNG,Fax Extension (Long),CHAR,10
+PO_BOX,PO Box,CHAR,10
+PO_BOX_CIT,PO Box City,CHAR,40
+PO_BOX_REG,PO Box Region,CHAR,3
+PO_BOX_CTY,PO Box Country,CHAR,3
+CITY_CODE,City Code,CHAR,4
+COUNTY_CODE,County Code,CHAR,3
+TOWNSHIP_CODE,Township Code,CHAR,3
+E_MAIL,Email Address,CHAR,241
+STR_SUPPL1_VAL,Street Supplement 1 Validation,CHAR,1
+STR_SUPPL2_VAL,Street Supplement 2 Validation,CHAR,1
+STR_SUPPL3_VAL,Street Supplement 3 Validation,CHAR,1
+LOCATION_VAL,Location Validation,CHAR,1
+BUILDING_VAL,Building Validation,CHAR,1
+FLOOR_VAL,Floor Validation,CHAR,1
+ROOMNUMBER_VAL,Room Number Validation,CHAR,1
+TEL_NUMBER_VAL,Telephone Validation,CHAR,1
+TEL_EXTENS_VAL,Telephone Extension Validation,CHAR,1
+FAX_NUMBER_VAL,Fax Validation,CHAR,1
+FAX_EXTENS_VAL,Fax Extension Validation,CHAR,1
+PO_BOX_VAL,PO Box Validation,CHAR,1
+PO_BOX_CIT_VAL,PO Box City Validation,CHAR,1
+DEFLT_COMM,Default Communication Method,CHAR,3
+ADDR_ORIGIN,Address Origin,CHAR,1
+ADDR_VERS,Address Version,NUMC,4
+ADDR_TYPE,Address Type,CHAR,1
+VALID_FROM,Valid From (Timestamp),DEC,15
+VALID_TO,Valid To (Timestamp),DEC,15

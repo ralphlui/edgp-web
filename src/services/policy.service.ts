@@ -4,7 +4,7 @@ import { ApiService } from './base-api.service'
 export interface PolicyRule {
   ruleId: string
   ruleName: string
-  appliesToField: string
+  appliesToField: string | string[] // Support both single field and multiple fields
   description: string | null
   parameters: Record<string, string | number | boolean>
 }
@@ -28,7 +28,7 @@ export interface CreatePolicyRequest {
   policyName: string
   domainName: string
   rules: {
-    appliesToField: string
+    appliesToField: string | string[] // Support both single field and multiple fields
     ruleName: string
     parameters: Record<string, unknown>
   }[]

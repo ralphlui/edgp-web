@@ -1,0 +1,48 @@
+﻿Field Name,Description,Data Type,Length
+MANDT,Client,CLNT,3
+KUNNR,Customer Number,CHAR,10
+LAND1,Country Key,CHAR,3
+NAME1,Customer Name 1,CHAR,35
+NAME2,Customer Name 2,CHAR,35
+NAME3,Customer Name 3,CHAR,35
+NAME4,Customer Name 4,CHAR,35
+ORT01,City,CHAR,35
+ORT02,District,CHAR,35
+PFACH,PO Box,CHAR,10
+PSTLZ,Postal Code,CHAR,10
+PSTL2,PO Box Postal Code,CHAR,10
+REGIO,Region,CHAR,3
+SORTL,Sort Field,CHAR,10
+STRAS,Street/House Number,CHAR,35
+ADRNR,Address Number,CHAR,10
+AUFSD,Central Order Block,CHAR,1
+BAHNS,Transportation Zone,CHAR,10
+BEGRU,Authorization Group,CHAR,4
+BRSCH,Industry Key,CHAR,4
+BUBKZ,Check Digit (ILN),CHAR,1
+DATLT,EDI Data Transfer,CHAR,1
+ERDAT,Created On,DATS,8
+ERNAM,Created By,CHAR,12
+FISKN,Fiscal Address Number,CHAR,16
+KNAZK,Alternative Payer,CHAR,10
+KTOKD,Customer Account Group,CHAR,4
+LIFSD,Central Billing Block,CHAR,1
+LOEVM,Deletion Flag,CHAR,1
+LZONE,Transportation Zone (Shipping Point),CHAR,10
+PERIV,Fiscal Year Variant,CHAR,2
+SPRAS,Language Key,LANG,1
+STCD1,Tax Number 1,CHAR,16
+STCD2,Tax Number 2,CHAR,11
+STCD3,Tax Number 3,CHAR,18
+STCD4,Tax Number 4,CHAR,18
+STCEG,VAT Registration Number,CHAR,20
+STKZA,Natural Person with Tax Number,CHAR,1
+STKZU,Natural Person with VAT Number,CHAR,1
+TELBX,Company Telephone,CHAR,16
+TELF1,Telephone 1,CHAR,16
+TELF2,Telephone 2,CHAR,16
+TELFX,Fax Number,CHAR,31
+TELTX,Teletex Number,CHAR,30
+TELX1,Telex Number,CHAR,30
+XCPDK,One-Time Account Indicator,CHAR,1
+VBUND,Company ID of Trading Partner,CHAR,6

@@ -279,7 +279,7 @@ onMounted(() => {
     <Modal
       v-model:open="showCreateForm"
       :footer="null"
-      width="900px"
+      width="800px"
       :mask-closable="false"
       :destroy-on-close="true"
     >

@@ -1,13 +1,13 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-6xl mx-auto p-2">
     <div class="bg-white rounded-lg shadow-lg">
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-200">
+      <div class="px-4 py-3 border-b border-gray-200">
         <h2 class="text-xl font-semibold text-gray-900">Create New Policy</h2>
       </div>
 
       <!-- Form Content -->
-      <div class="px-6 py-6">
+      <div class="px-4 py-4">
         <Form ref="formRef" :model="formData" layout="vertical" @finish="handleSubmit">
           <!-- Policy Name -->
           <FormItem label="Policy Name" name="policyName" class="mb-6">
@@ -20,26 +20,62 @@
 
           <!-- Domain Name -->
           <FormItem label="Domain Name" name="domainName" class="mb-6">
-            <Select v-model:value="formData.domainName" placeholder="Select domain" size="large">
-              <SelectOption value="Customer">Customer</SelectOption>
-              <SelectOption value="Location">Location</SelectOption>
-              <SelectOption value="Product">Product</SelectOption>
-              <SelectOption value="Vendor">Vendor</SelectOption>
-            </Select>
+            <div class="space-y-3">
+              <Select
+                v-model:value="formData.domainName"
+                placeholder="Select domain"
+                size="large"
+                @change="handleDomainChange"
+              >
+                <SelectOption value="Customer">Customer</SelectOption>
+                <SelectOption value="Location">Location</SelectOption>
+                <SelectOption value="Product">Product</SelectOption>
+                <SelectOption value="Vendor">Vendor</SelectOption>
+              </Select>
+
+              <!-- Download Template Button -->
+              <div v-if="formData.domainName" class="flex items-center">
+                <Button
+                  type="default"
+                  @click="downloadTemplate"
+                  class="flex items-center space-x-2"
+                >
+                  <template #icon>
+                    <DownloadOutlined />
+                  </template>
+                  Download {{ formData.domainName }} Template
+                </Button>
+                <Button
+                  type="text"
+                  @click="showFieldDefinitions"
+                  class="flex items-center tooltip-button"
+                  title="View field definitions"
+                  style="margin-top: 4px"
+                >
+                  <template #icon>
+                    <InfoCircleOutlined class="text-blue-500" />
+                  </template>
+                  <span class="text-xs text-gray-500">Apply this CSV format for data upload</span>
+                </Button>
+              </div>
+            </div>
           </FormItem>
 
           <!-- Rules Lists -->
-          <FormItem label="Rules" name="rules" class="mb-6">
+          <FormItem name="rules" class="mb-6">
+            <template #label>
+              <div class="flex items-center space-x-2">
+                <span>Rules</span>
+                <div v-if="loadingRules" class="text-sm text-gray-500">Loading rules...</div>
+                <div v-else-if="availableRules.length === 0" class="text-sm text-red-500">
+                  No rules available. Check console for errors.
+                </div>
+                <div v-else class="text-sm text-green-600">
+                  {{ availableRules.length }} rules loaded successfully
+                </div>
+              </div>
+            </template>
             <div class="space-y-4">
-              <!-- Debug Information -->
-              <div v-if="loadingRules" class="text-sm text-gray-500">Loading rules...</div>
-              <div v-else-if="availableRules.length === 0" class="text-sm text-red-500">
-                No rules available. Check console for errors.
-              </div>
-              <div v-else class="text-sm text-green-600">
-                {{ availableRules.length }} rules loaded successfully
-              </div>
-
               <!-- Rules Dropdown with Checkboxes -->
               <Select
                 v-model:value="selectedRuleNames"
@@ -74,7 +110,7 @@
                       <div class="flex-1">
                         <div class="font-medium text-gray-900">{{ rule.ruleName }}</div>
                         <div class="text-sm text-gray-600 mt-1">
-                          Configure the field and parameters for this rule
+                          Configure the fields and parameters for this rule
                         </div>
                       </div>
                       <Button type="text" danger @click="removeRule(index)" class="ml-4">
@@ -90,15 +126,70 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                           Field Name <span class="text-red-500">*</span>
                         </label>
-                        <Input
+                        <Select
                           v-model:value="rule.appliesToField"
-                          placeholder="e.g., email, age, name"
+                          mode="multiple"
+                          placeholder="Select fields from template"
                           size="small"
-                        />
+                          :loading="loadingTemplateFields"
+                          show-search
+                          :filter-option="filterFieldOption"
+                          :disabled="!formData.domainName || availableTemplateFields.length === 0"
+                        >
+                          <SelectOption
+                            v-for="field in availableTemplateFields"
+                            :key="field"
+                            :value="field"
+                            :label="field"
+                          >
+                            {{ field }}
+                          </SelectOption>
+                        </Select>
+
+                        <!-- Display selected fields -->
+                        <div
+                          v-if="
+                            Array.isArray(rule.appliesToField) && rule.appliesToField.length > 0
+                          "
+                          class="mt-2"
+                        >
+                          <div class="text-xs text-gray-500 mb-1">Applied to fields:</div>
+                          <div class="flex flex-wrap gap-1">
+                            <span
+                              v-for="field in rule.appliesToField"
+                              :key="field"
+                              class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium"
+                            >
+                              {{ field }}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div v-if="!formData.domainName" class="text-xs text-gray-500 mt-1">
+                          Please select a domain first to load available fields
+                        </div>
+                        <div
+                          v-else-if="availableTemplateFields.length === 0"
+                          class="text-xs text-orange-500 mt-1"
+                        >
+                          No template fields available for {{ formData.domainName }}
+                        </div>
+                      </div>
+
+                      <!-- Available Parameters Display -->
+                      <div v-if="getRuleParameterValues(rule.ruleName)">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                          Available Parameters
+                        </label>
+                        <div class="bg-blue-50 p-2 rounded text-xs border">
+                          <pre class="text-blue-800 whitespace-pre-wrap">{{
+                            JSON.stringify(getRuleParameterValues(rule.ruleName), null, 2)
+                          }}</pre>
+                        </div>
                       </div>
 
                       <!-- Dynamic Parameters based on rule -->
-                      <div v-if="getRuleParameters(rule.ruleName)">
+                      <div v-else-if="getRuleParameters(rule.ruleName)" class="md:col-start-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                           Parameters
                         </label>
@@ -176,6 +267,49 @@
         </Form>
       </div>
     </div>
+
+    <!-- Field Definitions Modal -->
+    <Modal
+      v-model:open="showDefinitionsModal"
+      :title="`${formData.domainName} Template Field Definitions`"
+      width="1000px"
+      :footer="null"
+      :destroy-on-close="true"
+      :style="{ top: '250px' }"
+    >
+      <div v-if="loadingDefinitions" class="text-center py-8">
+        <div class="text-gray-500">Loading field definitions...</div>
+      </div>
+      <div v-else-if="fieldDefinitions.length > 0">
+        <Table
+          :columns="definitionColumns"
+          :data-source="fieldDefinitions"
+          :pagination="false"
+          size="small"
+          :scroll="{ y: 400 }"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'fieldName'">
+              <span class="font-medium text-gray-900">{{ record.fieldName }}</span>
+            </template>
+            <template v-else-if="column.key === 'description'">
+              <span class="text-gray-700">{{ record.description }}</span>
+            </template>
+            <template v-else-if="column.key === 'dataType'">
+              <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                {{ record.dataType }}
+              </span>
+            </template>
+            <template v-else-if="column.key === 'length'">
+              <span class="text-gray-600">{{ record.length }}</span>
+            </template>
+          </template>
+        </Table>
+      </div>
+      <div v-else class="text-center py-8">
+        <div class="text-gray-500">No field definitions available</div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -191,9 +325,11 @@ import {
   Checkbox,
   Button,
   InputNumber,
+  Modal,
+  Table,
   message,
 } from 'ant-design-vue'
-import { DeleteOutlined } from '@ant-design/icons-vue'
+import { DeleteOutlined, DownloadOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
 import { policyService, type CreatePolicyRequest } from '@/services/policy.service'
 import { rulesService, type Rule } from '@/services/rules.service'
 import { useAuthStore } from '@/stores/auth'
@@ -211,6 +347,8 @@ const authStore = useAuthStore()
 const submitting = ref(false)
 const loadingRules = ref(false)
 const selectedRuleNames = ref<string[]>([])
+const loadingTemplateFields = ref(false)
+const availableTemplateFields = ref<string[]>([])
 
 // Form data
 const formData = ref({
@@ -223,6 +361,46 @@ const formData = ref({
 
 // Rules data
 const availableRules = ref<Rule[]>([])
+
+// Field definitions modal
+const showDefinitionsModal = ref(false)
+const loadingDefinitions = ref(false)
+const fieldDefinitions = ref<FieldDefinition[]>([])
+
+interface FieldDefinition {
+  fieldName: string
+  description: string
+  dataType: string
+  length: string
+}
+
+// Table columns for field definitions
+const definitionColumns = [
+  {
+    title: 'Field Name',
+    dataIndex: 'fieldName',
+    key: 'fieldName',
+    width: '25%',
+  },
+  {
+    title: 'Description',
+    dataIndex: 'description',
+    key: 'description',
+    width: '40%',
+  },
+  {
+    title: 'Data Type',
+    dataIndex: 'dataType',
+    key: 'dataType',
+    width: '20%',
+  },
+  {
+    title: 'Length',
+    dataIndex: 'length',
+    key: 'length',
+    width: '15%',
+  },
+]
 
 // Load available rules
 const loadRules = async () => {
@@ -259,12 +437,153 @@ const loadRules = async () => {
   }
 }
 
+// Handle domain change
+const handleDomainChange = (value: unknown) => {
+  console.log('Domain changed to:', value)
+  if (typeof value === 'string') {
+    loadTemplateFields(value)
+  }
+}
+
+// Load template fields from CSV template
+const loadTemplateFields = async (domainName: string) => {
+  try {
+    loadingTemplateFields.value = true
+
+    const templateFiles: Record<string, string> = {
+      Customer: '/csv_template/Customer_TemplateFile.csv',
+      Location: '/csv_template/Location_TemplateFile.csv',
+      Product: '/csv_template/Product_TemplateFile.csv',
+      Vendor: '/csv_template/Vendor_TemplateFile.csv',
+    }
+
+    const templatePath = templateFiles[domainName]
+
+    if (templatePath) {
+      const response = await fetch(templatePath)
+      const csvText = await response.text()
+
+      // Parse CSV to get field names (first line contains headers)
+      const lines = csvText.split('\n').filter((line) => line.trim())
+      if (lines.length > 0) {
+        const fieldNames = lines[0].split(',').map((field) => field.trim())
+        availableTemplateFields.value = fieldNames
+        console.log(`Loaded ${fieldNames.length} template fields for ${domainName}:`, fieldNames)
+      }
+    } else {
+      console.warn(`Template file not found for domain: ${domainName}`)
+      availableTemplateFields.value = []
+    }
+  } catch (error) {
+    console.error('Error loading template fields:', error)
+    message.error('Failed to load template fields')
+    availableTemplateFields.value = []
+  } finally {
+    loadingTemplateFields.value = false
+  }
+}
+
+// Download template file
+const downloadTemplate = () => {
+  if (!formData.value.domainName) {
+    message.warning('Please select a domain first')
+    return
+  }
+
+  const templateFiles: Record<string, string> = {
+    Customer: '/csv_template/Customer_TemplateFile.csv',
+    Location: '/csv_template/Location_TemplateFile.csv',
+    Product: '/csv_template/Product_TemplateFile.csv',
+    Vendor: '/csv_template/Vendor_TemplateFile.csv',
+  }
+
+  const templatePath = templateFiles[formData.value.domainName]
+
+  if (templatePath) {
+    // Create a temporary link element and trigger download
+    const link = document.createElement('a')
+    link.href = templatePath
+    link.download = `${formData.value.domainName}_TemplateFile.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    message.success(`${formData.value.domainName} template downloaded successfully`)
+  } else {
+    message.error('Template file not found')
+  }
+}
+
+// Show field definitions modal
+const showFieldDefinitions = async () => {
+  if (!formData.value.domainName) {
+    message.warning('Please select a domain first')
+    return
+  }
+
+  showDefinitionsModal.value = true
+  await loadFieldDefinitions()
+}
+
+// Load field definitions from CSV file
+const loadFieldDefinitions = async () => {
+  if (!formData.value.domainName) return
+
+  try {
+    loadingDefinitions.value = true
+
+    const definitionFiles: Record<string, string> = {
+      Customer: '/standard_templateDetailsDef/Customer_Template_DefDetails.csv',
+      Location: '/standard_templateDetailsDef/Location_Template_DefDetails.csv',
+      Product: '/standard_templateDetailsDef/Product_Template_DefDetails.csv',
+      Vendor: '/standard_templateDetailsDef/Vendor_Template_DefDetails.csv',
+    }
+
+    const definitionPath = definitionFiles[formData.value.domainName]
+
+    if (definitionPath) {
+      const response = await fetch(definitionPath)
+      const csvText = await response.text()
+
+      // Parse CSV content
+      const lines = csvText.split('\n').filter((line) => line.trim())
+
+      const definitions: FieldDefinition[] = lines
+        .slice(1)
+        .map((line) => {
+          const values = line.split(',')
+          return {
+            fieldName: values[0]?.trim() || '',
+            description: values[1]?.trim() || '',
+            dataType: values[2]?.trim() || '',
+            length: values[3]?.trim() || '',
+          }
+        })
+        .filter((def) => def.fieldName) // Filter out empty rows
+
+      fieldDefinitions.value = definitions
+    } else {
+      message.error('Field definitions file not found')
+    }
+  } catch (error) {
+    console.error('Error loading field definitions:', error)
+    message.error('Failed to load field definitions')
+  } finally {
+    loadingDefinitions.value = false
+  }
+}
+
 // Filter rules in dropdown
 const filterRuleOption = (input: string, option: { value: string; label: string }) => {
   return (
     option.value.toLowerCase().includes(input.toLowerCase()) ||
     option.label.toLowerCase().includes(input.toLowerCase())
   )
+}
+
+// Filter template fields in dropdown
+const filterFieldOption = (input: string, option: { value: string; label: string }) => {
+  return option.value.toLowerCase().includes(input.toLowerCase())
 }
 
 // Handle rule selection from dropdown
@@ -278,7 +597,7 @@ const handleRuleSelection = (value: unknown) => {
       const ruleTemplate = availableRules.value.find((r) => r.ruleName === ruleName)
       if (ruleTemplate) {
         const newRule = {
-          appliesToField: '',
+          appliesToField: [], // Initialize as empty array for multi-select
           ruleName: ruleName,
           parameters: getDefaultParameters(ruleName, ruleTemplate.value),
         }
@@ -318,6 +637,12 @@ const getDefaultParameters = (ruleName: string, value: unknown): Record<string, 
 const getRuleParameters = (ruleName: string): boolean => {
   const rule = availableRules.value.find((r) => r.ruleName === ruleName)
   return !!(rule && rule.value !== null && rule.value !== undefined)
+}
+
+// Get rule parameter values to display
+const getRuleParameterValues = (ruleName: string): unknown => {
+  const rule = availableRules.value.find((r) => r.ruleName === ruleName)
+  return rule?.value || null
 }
 
 // Remove rule
@@ -382,5 +707,10 @@ onMounted(() => {
 
 :deep(.ant-btn) {
   border-radius: 8px;
+}
+
+/* Remove hover background for tooltip button */
+:deep(.tooltip-button.ant-btn-text:hover) {
+  background-color: transparent !important;
 }
 </style>
