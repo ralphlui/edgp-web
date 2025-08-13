@@ -619,22 +619,15 @@ const handleRuleSelection = (value: unknown) => {
   )
 }
 
-// Get default parameters for a rule based on its value structure
+// Get parameters directly from rule's value object
 const getDefaultParameters = (ruleName: string, value: unknown): Record<string, unknown> => {
   if (!value || value === null) {
     return {}
   }
 
-  if (typeof value === 'object' && !Array.isArray(value)) {
-    const params: Record<string, unknown> = {}
-    Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
-      params[key] = typeof val === 'string' ? '' : typeof val === 'number' ? 0 : val
-    })
-    return params
-  }
-
-  if (Array.isArray(value)) {
-    return { values: [] }
+  // Directly return the rule's value object as parameters, regardless of type
+  if (typeof value === 'object') {
+    return value as Record<string, unknown>
   }
 
   return {}
