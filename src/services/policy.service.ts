@@ -35,7 +35,6 @@ export interface CreatePolicyRequest {
   description: string
   isPublished: boolean
   createdBy: string
-  organizationId: string
   [key: string]: unknown
 }
 
