@@ -1,5 +1,5 @@
-import axios, { type AxiosInstance } from 'axios'
 import { API_ENDPOINTS } from '@/config/api.config'
+import { ApiService } from './base-api.service'
 
 export interface Organization {
   name: string
@@ -40,77 +40,13 @@ export interface FileListRequest {
   organizationId?: string
 }
 
-class FileManagementService {
-  private api: AxiosInstance
-
+class FileManagementService extends ApiService {
   constructor() {
-    // Create a separate axios instance for file management API without credentials
-    this.api = axios.create({
-      baseURL: API_ENDPOINTS.fileManagementBase,
-      timeout: 30000,
-      withCredentials: false, // Disable credentials to avoid CORS issues
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-    })
-
-    // Setup request interceptor to add auth token
-    this.api.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('access_token')
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
-        }
-        console.log('File Management API Request:', {
-          url: config.url,
-          method: config.method,
-          hasToken: !!token,
-        })
-        return config
-      },
-      (error) => {
-        console.error('File Management API Request Error:', error)
-        return Promise.reject(error)
-      },
-    )
-
-    // Setup response interceptor for error handling
-    this.api.interceptors.response.use(
-      (response) => {
-        console.log('File Management API Response:', {
-          url: response.config.url,
-          status: response.status,
-          data: response.data,
-        })
-        return response
-      },
-      (error) => {
-        console.error('File Management API Error:', {
-          url: error.config?.url,
-          status: error.response?.status,
-          message: error.message,
-          data: error.response?.data,
-        })
-        return Promise.reject(error)
-      },
-    )
-  }
-
-  // HTTP method implementations
-  private async get<T>(url: string): Promise<{ data: T }> {
-    const response = await this.api.get<T>(url)
-    return { data: response.data }
-  }
-
-  private async post<T>(url: string, data: unknown): Promise<{ data: T }> {
-    const response = await this.api.post<T>(url, data)
-    return { data: response.data }
-  }
-
-  private async delete<T>(url: string): Promise<{ data: T }> {
-    const response = await this.api.delete<T>(url)
-    return { data: response.data }
+    super()
+    // Set the base URL for file management API
+    this.api.defaults.baseURL = API_ENDPOINTS.fileManagementBase
+    // Disable credentials for file management API to avoid CORS issues
+    this.api.defaults.withCredentials = false
   }
 
   async getUploadedFiles(params: FileListRequest = {}): Promise<FileListResponse> {
