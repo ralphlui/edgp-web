@@ -2,7 +2,22 @@
   <div class="uploaded-files-management">
     <!-- Header with filters -->
     <div class="mb-6">
-      <div class="flex justify-end items-center mb-4">
+      <div class="flex justify-between items-center mb-4">
+        <!-- Auto-refresh status indicator (left side) -->
+        <div v-if="autoRefreshEnabled" class="flex items-center">
+          <div
+            class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 flex items-center gap-2"
+          >
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span class="text-sm text-green-700">
+              Auto-refresh active - updates every 30 seconds
+            </span>
+          </div>
+        </div>
+        <!-- Empty div to maintain spacing when auto-refresh is off -->
+        <div v-else></div>
+
+        <!-- Control buttons (right side) -->
         <div class="flex items-center gap-3">
           <!-- Auto-refresh toggle -->
           <div class="flex items-center gap-2">
@@ -31,18 +46,6 @@
           >
             Refresh
           </Button>
-        </div>
-      </div>
-
-      <!-- Auto-refresh status indicator -->
-      <div v-if="autoRefreshEnabled" class="flex items-center justify-center mb-4">
-        <div
-          class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 flex items-center gap-2"
-        >
-          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span class="text-sm text-green-700">
-            Auto-refresh active - updates every 30 seconds
-          </span>
         </div>
       </div>
 
@@ -535,13 +538,14 @@ const loadFiles = async (silent = false) => {
         )
       }
 
-      // Load mock data for development
-      files.value = getMockData()
+      // Clear files when API is not available
+      files.value = []
     } else {
       // Only show error for manual refresh, not auto-refresh
       if (!silent) {
         message.error('Failed to load uploaded files')
       }
+      files.value = []
     }
   } finally {
     if (!silent) {
@@ -713,88 +717,6 @@ const formatTime = (dateString: string) => {
 
 const formatDateTime = (dateString: string) => {
   return new Date(dateString).toLocaleString()
-}
-
-// Mock data for development when API is not available
-const getMockData = (): UploadedFile[] => {
-  return [
-    {
-      id: '808ec7e1-e1d8-4ac0-a232-e6a1dcc011d0',
-      uploaded_by: 'analyst_a@gmail.com',
-      domain_name: 'Customer',
-      file_status: 'UNPROCESSED',
-      file_name: 'Customer_File_v001_filled.csv',
-      process_stage: 'UNPROCESSED',
-      organization: {
-        name: 'Wai - Organization A',
-        id: 'c7ddfeaa-a005-4eb2-b7d1-ec5091d5a5bb',
-      },
-      uploaded_date: '2025-08-15 09:09:29',
-      total_rows_count: 12,
-      updated_date: '',
-      policy: {
-        name: 'Test create Policy A',
-        id: '006f74df-1a0c-4c3c-885c-783166738380',
-      },
-    },
-    {
-      id: '4f22e70d-172e-4777-b146-5e45526d4cdb',
-      uploaded_by: 'analyst_a@gmail.com',
-      domain_name: 'Product',
-      file_status: 'PROCESSING',
-      file_name: 'Customer_File_v001_human_names.csv',
-      process_stage: 'PROCESSING',
-      organization: {
-        name: 'Wai - Organization A',
-        id: 'c7ddfeaa-a005-4eb2-b7d1-ec5091d5a5bb',
-      },
-      uploaded_date: '2025-08-15 00:47:23',
-      total_rows_count: 12,
-      updated_date: '2025-08-15 01:30:15',
-      policy: {
-        name: 'Test create Policy A',
-        id: '006f74df-1a0c-4c3c-885c-783166738380',
-      },
-    },
-    {
-      id: '2169b4ee-68a8-4b56-987c-756ef17c6257',
-      uploaded_by: 'analyst_a@gmail.com',
-      domain_name: 'Product',
-      file_status: 'PROCESSED',
-      file_name: 'Product_Template_DefDetails.csv',
-      process_stage: 'PROCESSED',
-      organization: {
-        name: 'Wai - Organization A',
-        id: 'c7ddfeaa-a005-4eb2-b7d1-ec5091d5a5bb',
-      },
-      uploaded_date: '2025-08-14 22:07:48',
-      total_rows_count: 118,
-      updated_date: '2025-08-14 22:45:32',
-      policy: {
-        name: 'Test create Policy A',
-        id: '006f74df-1a0c-4c3c-885c-783166738380',
-      },
-    },
-    {
-      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-      uploaded_by: 'data_analyst@company.com',
-      domain_name: 'Location',
-      file_status: 'FAILED',
-      file_name: 'Location_Data_Import_Failed.csv',
-      process_stage: 'FAILED',
-      organization: {
-        name: 'Data Analysis Corp',
-        id: 'abc12345-def6-7890-abcd-ef1234567890',
-      },
-      uploaded_date: '2025-08-14 15:30:00',
-      total_rows_count: 250,
-      updated_date: '2025-08-14 15:45:00',
-      policy: {
-        name: 'Location Data Policy',
-        id: 'location-policy-id-123',
-      },
-    },
-  ]
 }
 
 // Lifecycle

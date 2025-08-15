@@ -7,12 +7,14 @@ import {
   BankOutlined,
   LogoutOutlined,
   FileProtectOutlined,
+  ProjectOutlined,
 } from '@ant-design/icons-vue'
 import { Layout, Menu, Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import dashboardIcon from '@/assets/dashboardIcon.png'
 import InviteNewUser from '@/components/auth/InviteNewUser.vue'
 import FileDataDashboard from '@/components/dataDashboard/FileDataDashboard.vue'
+import WorkflowManagement from '@/components/workflowManagement/WorkflowManagement.vue'
 import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
 import OrganizationList from '@/components/organisations/OrganizationList.vue'
 import PolicyList from '@/components/policyManagement/PolicyList.vue'
@@ -67,6 +69,8 @@ const currentComponent = computed(() => {
   switch (selectedKeys.value[0]) {
     case '1':
       return 'FileDataDashboard'
+    case '5':
+      return 'WorkflowManagement'
     case '3':
       return 'Organization'
     case '4':
@@ -224,6 +228,12 @@ const handleLogout = () => {
             </template>
             <span>Policy Management</span>
           </Menu.Item>
+          <Menu.Item key="5">
+            <template #icon>
+              <ProjectOutlined />
+            </template>
+            <span>Workflow Management</span>
+          </Menu.Item>
           <Menu.Divider class="my-2" />
           <Menu.Item key="logout" @click="handleLogout">
             <template #icon>
@@ -240,6 +250,9 @@ const handleLogout = () => {
       <Layout.Content class="p-6" style="background: #e5e7eb">
         <!-- Conditional rendering based on selected menu item -->
         <FileDataDashboard v-if="currentComponent === 'FileDataDashboard'" />
+
+        <!-- Workflow Management section -->
+        <WorkflowManagement v-else-if="currentComponent === 'WorkflowManagement'" />
 
         <!-- Policy List section -->
         <PolicyList v-else-if="currentComponent === 'PolicyList'" />
