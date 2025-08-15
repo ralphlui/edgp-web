@@ -61,15 +61,26 @@ const fileStats = computed(() => ({
 
 // File validation function
 const validateFile = (file: File): boolean => {
-  const isCSV = file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')
-  if (!isCSV) {
-    message.error('You can only upload CSV files!')
+  // Check file extension and MIME type for CSV
+  const allowedMimeTypes = ['text/csv', 'text/plain', 'application/csv']
+  const isCSVExtension = file.name.toLowerCase().endsWith('.csv')
+  const isCSVMimeType = allowedMimeTypes.includes(file.type) || file.type === ''
+
+  if (!isCSVExtension && !isCSVMimeType) {
+    message.error('Please upload a valid CSV file. Only .csv files are supported.')
     return false
   }
 
+  // Check file size (10MB limit)
   const isLt10M = file.size / 1024 / 1024 < 10
   if (!isLt10M) {
     message.error('File must be smaller than 10MB!')
+    return false
+  }
+
+  // Check if file is not empty
+  if (file.size === 0) {
+    message.error('Cannot upload empty files!')
     return false
   }
 
@@ -582,7 +593,14 @@ const handleErrorModalClose = () => {
             <div class="flex items-center space-x-3">
               <div class="flex-shrink-0">
                 <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <div class="w-5 h-5 bg-green-500 rounded"></div>
+                  <!-- CSV File Icon -->
+                  <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm2 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h4a1 1 0 110 2H7a1 1 0 01-1-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
                 </div>
               </div>
               <div>
