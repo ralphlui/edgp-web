@@ -98,6 +98,31 @@ class PolicyService extends ApiService {
     }
   }
 
+  async getPoliciesByDomain(
+    domainName: string,
+    page: number = 1,
+    size: number = 1000,
+  ): Promise<PolicyListResponse> {
+    try {
+      const queryParams = new URLSearchParams({
+        domainName,
+        page: page.toString(),
+        size: size.toString(),
+      })
+
+      const url = `${API_ENDPOINTS.policies.list}?${queryParams.toString()}`
+      console.log('Making domain-specific policy API call to:', url)
+
+      const response = await this.get<PolicyListResponse>(url)
+      console.log('Domain-specific policy API raw response:', response)
+      console.log('Domain-specific policy API response data:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Domain-specific policy API error:', error)
+      throw error
+    }
+  }
+
   async createPolicy(policyData: CreatePolicyRequest): Promise<CreatePolicyResponse> {
     try {
       console.log('Creating policy with data:', policyData)

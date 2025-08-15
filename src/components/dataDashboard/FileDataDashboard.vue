@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Button, Modal, message, Tooltip, Select, Table } from 'ant-design-vue'
-import { PlusOutlined, InboxOutlined, EyeOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, InboxOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { policyService, type Policy } from '@/services/policy.service'
 import { fileUploadService, type FileUploadResponse } from '@/services/file-upload.service'
 
@@ -107,7 +107,11 @@ const handleDrop = (event: DragEvent) => {
 const handleUploadFile = () => {
   console.log('Opening upload modal')
   showUploadModal.value = true
-  loadPolicies() // Load policies when modal opens
+  // Don't load policies immediately - wait for domain selection
+  // Clear previous selections
+  selectedDomain.value = ''
+  selectedPolicy.value = ''
+  policies.value = []
 }
 
 const handleUploadClose = () => {
@@ -253,21 +257,50 @@ const handleUploadSubmit = async () => {
 }
 
 // Load policies from API
-const loadPolicies = async () => {
+const loadPolicies = async (domainName?: string) => {
   try {
     loadingPolicies.value = true
-    const response = await policyService.getPolicies()
+
+    let response
+    if (domainName) {
+      console.log('Loading policies for domain:', domainName)
+      response = await policyService.getPoliciesByDomain(domainName)
+    } else {
+      console.log('Loading all policies')
+      response = await policyService.getPolicies()
+    }
+
     console.log('Policies loaded:', response.data)
 
     // Filter only published policies
     policies.value = response.data.filter((policy: Policy) => policy.published)
+    console.log('Filtered published policies:', policies.value.length)
   } catch (error) {
     console.error('Error loading policies:', error)
-    message.error('Failed to load policies')
+    message.error(`Failed to load policies${domainName ? ` for ${domainName}` : ''}`)
+    policies.value = [] // Clear policies on error
   } finally {
     loadingPolicies.value = false
   }
 }
+
+// Watch for domain changes and load corresponding policies
+watch(
+  selectedDomain,
+  async (newDomain, oldDomain) => {
+    console.log('Domain changed from', oldDomain, 'to', newDomain)
+
+    // Clear policy selection when domain changes
+    selectedPolicy.value = ''
+    policies.value = []
+
+    // Load policies for the new domain if one is selected
+    if (newDomain) {
+      await loadPolicies(newDomain)
+    }
+  },
+  { immediate: false },
+) // Don't trigger on initial load
 
 // CSV parsing function
 const parseCSVFile = (file: File): Promise<{ data: CSVRow[]; columns: TableColumn[] }> => {
@@ -350,6 +383,20 @@ const handleViewFileData = async () => {
   } finally {
     loadingFilePreview.value = false
   }
+}
+
+// Delete attached file
+const handleDeleteFile = () => {
+  console.log('Deleting attached file:', uploadedFile.value?.name)
+  uploadedFile.value = null
+
+  // Clear the file input
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
+
+  // Show success message
+  message.success('File removed successfully')
 }
 
 // Close file preview modal
@@ -543,18 +590,32 @@ const handleErrorModalClose = () => {
                 <p class="text-xs text-gray-500">{{ (uploadedFile.size / 1024).toFixed(2) }} KB</p>
               </div>
             </div>
-            <Tooltip title="View file data">
-              <Button
-                type="text"
-                shape="circle"
-                @click="handleViewFileData"
-                class="text-blue-500 hover:text-blue-700"
-              >
-                <template #icon>
-                  <EyeOutlined />
-                </template>
-              </Button>
-            </Tooltip>
+            <div class="flex items-center space-x-2">
+              <Tooltip title="View file data">
+                <Button
+                  type="text"
+                  shape="circle"
+                  @click="handleViewFileData"
+                  class="text-blue-500 hover:text-blue-700"
+                >
+                  <template #icon>
+                    <EyeOutlined />
+                  </template>
+                </Button>
+              </Tooltip>
+              <Tooltip title="Remove file">
+                <Button
+                  type="text"
+                  shape="circle"
+                  @click="handleDeleteFile"
+                  class="text-red-500 hover:text-red-700"
+                >
+                  <template #icon>
+                    <DeleteOutlined />
+                  </template>
+                </Button>
+              </Tooltip>
+            </div>
           </div>
         </div>
 
