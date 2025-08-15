@@ -221,7 +221,10 @@
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span class="text-sm font-medium text-gray-900">{{ record.file_name }}</span>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ record.file_name }}</p>
+                  <p class="text-xs text-gray-500">{{ record.id }}</p>
+                </div>
               </div>
             </template>
 
