@@ -1,0 +1,16 @@
+field_name,description,data_type,length,example_notes
+MANDT,Client,CLNT,3,100
+MATNR,Material Number,CHAR,18,F-1000
+ERSDA,Created On,DATS,8,20230615
+ERNAM,Created By,CHAR,12,USER123
+LAEDA,Last Changed On,DATS,8,20240120
+AENAM,Changed By,CHAR,12,USER456
+VPSTA,Maintenance Status,CHAR,15,A (Active)
+PSTAT,Maintenance Status (Internal),CHAR,15,B (Blocked)
+LVORM,Deletion Flag,CHAR,1,X (Marked for deletion)
+MTART,Material Type,CHAR,4,FERT (Finished goods)
+MBRSH,Industry Sector,CHAR,1,A (Plant/Animal)
+MATKL,Material Group,CHAR,9,ELECTRONICS
+BISMT,Old Material Number,CHAR,18,OLD-1000
+MEINS,Base Unit of Measure,UNIT,3,PC
+BSTME,Order Unit,UNIT,3,BOX

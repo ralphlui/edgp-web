@@ -12,7 +12,7 @@ import { Layout, Menu, Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import dashboardIcon from '@/assets/dashboardIcon.png'
 import InviteNewUser from '@/components/auth/InviteNewUser.vue'
-import DataDashboard from '@/components/dataDashboard/DataDashboard.vue'
+import FileDataDashboard from '@/components/dataDashboard/FileDataDashboard.vue'
 import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
 import OrganizationList from '@/components/organisations/OrganizationList.vue'
 import PolicyList from '@/components/policyManagement/PolicyList.vue'
@@ -66,7 +66,7 @@ onMounted(() => {
 const currentComponent = computed(() => {
   switch (selectedKeys.value[0]) {
     case '1':
-      return 'DataDashboard'
+      return 'FileDataDashboard'
     case '3':
       return 'Organization'
     case '4':
@@ -204,7 +204,7 @@ const handleLogout = () => {
             <template #icon>
               <img :src="dashboardIcon" alt="Dashboard" class="w-5 h-5" />
             </template>
-            <span>Data Dashboard</span>
+            <span>File and Data Dashboard</span>
           </Menu.Item>
           <Menu.Item key="2">
             <template #icon>
@@ -239,7 +239,7 @@ const handleLogout = () => {
       <!-- Main Content -->
       <Layout.Content class="p-6" style="background: #e5e7eb">
         <!-- Conditional rendering based on selected menu item -->
-        <DataDashboard v-if="currentComponent === 'DataDashboard'" />
+        <FileDataDashboard v-if="currentComponent === 'FileDataDashboard'" />
 
         <!-- Policy List section -->
         <PolicyList v-else-if="currentComponent === 'PolicyList'" />
