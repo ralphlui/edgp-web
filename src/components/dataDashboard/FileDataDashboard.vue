@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { Button, Modal, message, Tooltip, Select, Table } from 'ant-design-vue'
 import { PlusOutlined, InboxOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { policyService, type Policy } from '@/services/policy.service'
 import { fileUploadService, type FileUploadResponse } from '@/services/file-upload.service'
+import UploadedFilesList from './UploadedFilesList.vue'
 
 // Types for file preview
 interface CSVRow {
@@ -51,13 +52,6 @@ const domainOptions = [
   { label: 'Product', value: 'Product' },
   { label: 'Vendor', value: 'Vendor' },
 ]
-
-// Mock data for file statistics (replace with real API data later)
-const fileStats = computed(() => ({
-  totalFiles: 0,
-  successFiles: 0,
-  failFiles: 0,
-}))
 
 // File validation function
 const validateFile = (file: File): boolean => {
@@ -438,57 +432,13 @@ const handleErrorModalClose = () => {
       <Button
         type="primary"
         size="large"
-        class="h-12 px-8 text-lg"
+        class="h-12 px-8 text-lg flex items-center gap-1"
         style="background-color: #4f46e5; color: white"
         @click="handleUploadFile"
       >
-        <template #icon>
-          <PlusOutlined />
-        </template>
+        <PlusOutlined />
         Upload File
       </Button>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Total Uploaded Files -->
-      <div class="bg-white rounded-lg shadow p-6 flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <div class="w-6 h-6 bg-blue-500 rounded"></div>
-          </div>
-        </div>
-        <div class="ml-4">
-          <h3 class="text-sm font-medium text-gray-500">Total Uploaded Files</h3>
-          <p class="mt-1 text-3xl font-semibold">{{ fileStats.totalFiles }}</p>
-        </div>
-      </div>
-
-      <!-- Success Files -->
-      <div class="bg-white rounded-lg shadow p-6 flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-            <div class="w-6 h-6 bg-green-500 rounded-full"></div>
-          </div>
-        </div>
-        <div class="ml-4">
-          <h3 class="text-sm font-medium text-gray-500">Success Files</h3>
-          <p class="mt-1 text-3xl font-semibold">{{ fileStats.successFiles }}</p>
-        </div>
-      </div>
-
-      <!-- Fail Files -->
-      <div class="bg-white rounded-lg shadow p-6 flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-            <div class="w-6 h-6 bg-red-500 rounded-sm"></div>
-          </div>
-        </div>
-        <div class="ml-4">
-          <h3 class="text-sm font-medium text-gray-500">Fail Files</h3>
-          <p class="mt-1 text-3xl font-semibold">{{ fileStats.failFiles }}</p>
-        </div>
-      </div>
     </div>
 
     <!-- Uploaded Files List and Management Section -->
@@ -500,10 +450,8 @@ const handleErrorModalClose = () => {
       </div>
 
       <div class="p-6">
-        <!-- This section is intentionally left blank as requested -->
-        <div class="text-center py-12 text-gray-500">
-          <p class="text-lg">File management functionality will be implemented here</p>
-        </div>
+        <!-- Uploaded Files List and Management Component -->
+        <UploadedFilesList />
       </div>
     </div>
 
