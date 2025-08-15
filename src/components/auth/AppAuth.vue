@@ -104,14 +104,7 @@ defineExpose({
 </script>
 
 <template>
-  <AModal
-    v-model:visible="visible"
-    :footer="null"
-    title=""
-    :width="400"
-    :maskClosable="true"
-    centered
-  >
+  <AModal v-model:open="visible" :footer="null" title="" :width="400" :maskClosable="true" centered>
     <div class="flex flex-col items-center">
       <h2 class="text-2xl font-bold mb-2 text-center">Login</h2>
       <ADivider class="my-2" />

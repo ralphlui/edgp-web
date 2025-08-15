@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue'
+import { ref } from 'vue'
 import { Modal, Form, Input, Select, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { roleService } from '@/services/role.service'
@@ -101,7 +101,7 @@ defineExpose({ show })
 </script>
 
 <template>
-  <Modal v-model:visible="visible" :footer="null" @cancel="handleCancel">
+  <Modal v-model:open="visible" :footer="null" @cancel="handleCancel">
     <div class="p-4">
       <h2 class="text-xl font-semibold mb-6">Invite New User</h2>
       <Form layout="vertical">

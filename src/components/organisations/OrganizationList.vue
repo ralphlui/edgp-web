@@ -167,7 +167,7 @@ onMounted(() => {
     <!-- Organization Detail Modal -->
     <OrganizationDetailModal
       :organization-id="selectedOrganizationId"
-      v-model:visible="showDetailModal"
+      v-model:open="showDetailModal"
     />
   </div>
 </template>

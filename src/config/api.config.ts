@@ -2,6 +2,7 @@ interface ApiEndpoints {
   base: string
   orgBase: string
   policyBase: string
+  fileManagementBase: string
   auth: {
     login: string
     logout: string
@@ -33,12 +34,18 @@ interface ApiEndpoints {
     delete: string
     myPolicy: string
   }
+  fileManagement: {
+    list: string
+    delete: string
+    retry: string
+  }
 }
 
 export const API_ENDPOINTS: ApiEndpoints = {
   base: import.meta.env.VITE_ADMIN_API_URL || 'http://localhost:8081/api/admin',
   orgBase: import.meta.env.VITE_ORGANIZATION_API_URL || 'http://localhost:8082/api',
   policyBase: import.meta.env.VITE_POLICY_API_URL || 'http://localhost:8089/api',
+  fileManagementBase: import.meta.env.VITE_FILE_MANAGEMENT_API_URL || 'http://localhost:8083',
   auth: {
     login: '/users/login',
     logout: '/users/logout',
@@ -69,5 +76,10 @@ export const API_ENDPOINTS: ApiEndpoints = {
     update: '/policy',
     delete: '/policy',
     myPolicy: '/policy/my-policy',
+  },
+  fileManagement: {
+    list: '/api/mdm/data/file',
+    delete: '/api/mdm/data/file',
+    retry: '/api/mdm/data/file',
   },
 }

@@ -160,21 +160,21 @@ import { organizationService, type Organization } from '@/services/organization.
 
 interface Props {
   organizationId: string | null
-  visible: boolean
+  open: boolean
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  'update:visible': [value: boolean]
+  'update:open': [value: boolean]
 }>()
 
-const visible = ref(props.visible)
+const visible = ref(props.open)
 const loading = ref(false)
 const organization = ref<Organization | null>(null)
 
 // Watch for prop changes
 watch(
-  () => props.visible,
+  () => props.open,
   (newValue) => {
     visible.value = newValue
     if (newValue && props.organizationId) {
@@ -193,7 +193,7 @@ watch(
 )
 
 watch(visible, (newValue) => {
-  emit('update:visible', newValue)
+  emit('update:open', newValue)
   if (!newValue) {
     organization.value = null
   }

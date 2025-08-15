@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { Button, Modal, message, Tooltip, Select, Table } from 'ant-design-vue'
 import { PlusOutlined, InboxOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { policyService, type Policy } from '@/services/policy.service'
 import { fileUploadService, type FileUploadResponse } from '@/services/file-upload.service'
+import UploadedFilesList from './UploadedFilesList.vue'
 
 // Types for file preview
 interface CSVRow {
@@ -52,24 +53,28 @@ const domainOptions = [
   { label: 'Vendor', value: 'Vendor' },
 ]
 
-// Mock data for file statistics (replace with real API data later)
-const fileStats = computed(() => ({
-  totalFiles: 0,
-  successFiles: 0,
-  failFiles: 0,
-}))
-
 // File validation function
 const validateFile = (file: File): boolean => {
-  const isCSV = file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')
-  if (!isCSV) {
-    message.error('You can only upload CSV files!')
+  // Check file extension and MIME type for CSV
+  const allowedMimeTypes = ['text/csv', 'text/plain', 'application/csv']
+  const isCSVExtension = file.name.toLowerCase().endsWith('.csv')
+  const isCSVMimeType = allowedMimeTypes.includes(file.type) || file.type === ''
+
+  if (!isCSVExtension && !isCSVMimeType) {
+    message.error('Please upload a valid CSV file. Only .csv files are supported.')
     return false
   }
 
+  // Check file size (10MB limit)
   const isLt10M = file.size / 1024 / 1024 < 10
   if (!isLt10M) {
     message.error('File must be smaller than 10MB!')
+    return false
+  }
+
+  // Check if file is not empty
+  if (file.size === 0) {
+    message.error('Cannot upload empty files!')
     return false
   }
 
@@ -427,57 +432,13 @@ const handleErrorModalClose = () => {
       <Button
         type="primary"
         size="large"
-        class="h-12 px-8 text-lg"
+        class="h-12 px-8 text-lg flex items-center gap-1"
         style="background-color: #4f46e5; color: white"
         @click="handleUploadFile"
       >
-        <template #icon>
-          <PlusOutlined />
-        </template>
+        <PlusOutlined />
         Upload File
       </Button>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Total Uploaded Files -->
-      <div class="bg-white rounded-lg shadow p-6 flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <div class="w-6 h-6 bg-blue-500 rounded"></div>
-          </div>
-        </div>
-        <div class="ml-4">
-          <h3 class="text-sm font-medium text-gray-500">Total Uploaded Files</h3>
-          <p class="mt-1 text-3xl font-semibold">{{ fileStats.totalFiles }}</p>
-        </div>
-      </div>
-
-      <!-- Success Files -->
-      <div class="bg-white rounded-lg shadow p-6 flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-            <div class="w-6 h-6 bg-green-500 rounded-full"></div>
-          </div>
-        </div>
-        <div class="ml-4">
-          <h3 class="text-sm font-medium text-gray-500">Success Files</h3>
-          <p class="mt-1 text-3xl font-semibold">{{ fileStats.successFiles }}</p>
-        </div>
-      </div>
-
-      <!-- Fail Files -->
-      <div class="bg-white rounded-lg shadow p-6 flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-            <div class="w-6 h-6 bg-red-500 rounded-sm"></div>
-          </div>
-        </div>
-        <div class="ml-4">
-          <h3 class="text-sm font-medium text-gray-500">Fail Files</h3>
-          <p class="mt-1 text-3xl font-semibold">{{ fileStats.failFiles }}</p>
-        </div>
-      </div>
     </div>
 
     <!-- Uploaded Files List and Management Section -->
@@ -489,10 +450,8 @@ const handleErrorModalClose = () => {
       </div>
 
       <div class="p-6">
-        <!-- This section is intentionally left blank as requested -->
-        <div class="text-center py-12 text-gray-500">
-          <p class="text-lg">File management functionality will be implemented here</p>
-        </div>
+        <!-- Uploaded Files List and Management Component -->
+        <UploadedFilesList />
       </div>
     </div>
 
@@ -582,7 +541,14 @@ const handleErrorModalClose = () => {
             <div class="flex items-center space-x-3">
               <div class="flex-shrink-0">
                 <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <div class="w-5 h-5 bg-green-500 rounded"></div>
+                  <!-- CSV File Icon -->
+                  <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm2 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h4a1 1 0 110 2H7a1 1 0 01-1-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
                 </div>
               </div>
               <div>
