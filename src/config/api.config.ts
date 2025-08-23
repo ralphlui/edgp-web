@@ -3,6 +3,7 @@ interface ApiEndpoints {
   orgBase: string
   policyBase: string
   fileManagementBase: string
+  workflowBase: string
   auth: {
     login: string
     logout: string
@@ -39,6 +40,9 @@ interface ApiEndpoints {
     delete: string
     retry: string
   }
+  workflow: {
+    list: string
+  }
 }
 
 export const API_ENDPOINTS: ApiEndpoints = {
@@ -46,6 +50,7 @@ export const API_ENDPOINTS: ApiEndpoints = {
   orgBase: import.meta.env.VITE_ORGANIZATION_API_URL || 'http://localhost:8082/api',
   policyBase: import.meta.env.VITE_POLICY_API_URL || 'http://localhost:8089/api',
   fileManagementBase: import.meta.env.VITE_FILE_MANAGEMENT_API_URL || 'http://localhost:8083',
+  workflowBase: import.meta.env.VITE_WORKFLOW_API_URL || 'http://localhost:8084/api',
   auth: {
     login: '/users/login',
     logout: '/users/logout',
@@ -81,5 +86,8 @@ export const API_ENDPOINTS: ApiEndpoints = {
     list: '/api/mdm/data/file',
     delete: '/api/mdm/data/file',
     retry: '/api/mdm/data/file',
+  },
+  workflow: {
+    list: '/wfm',
   },
 }

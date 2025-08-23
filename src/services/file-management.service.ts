@@ -107,6 +107,22 @@ class FileManagementService extends ApiService {
       throw error
     }
   }
+
+  async getFileDetails(
+    fileId: string,
+  ): Promise<{ success: boolean; message: string; data: UploadedFile }> {
+    try {
+      console.log('Fetching file details for ID:', fileId)
+      const response = await this.get<{ success: boolean; message: string; data: UploadedFile }>(
+        `${API_ENDPOINTS.fileManagement.list}/${fileId}`,
+      )
+      console.log('File details response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching file details:', error)
+      throw error
+    }
+  }
 }
 
 export const fileManagementService = new FileManagementService()

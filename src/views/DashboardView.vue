@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -23,11 +23,26 @@ import { userService } from '@/services/user.service'
 import { useAuthStore } from '@/stores/auth'
 import type { UserListResponse } from '@/services/user.service'
 
+// Define props
+const props = defineProps<{
+  fileId?: string
+  activeComponent?: string
+}>()
+
+// Use fileId directly from props
+const fileId = computed(() => {
+  console.log('🎯 DashboardView fileId computed:', props.fileId)
+  return props.fileId
+})
+
 const collapsed = ref(false)
 const selectedKeys = ref(['2']) // Default to User Onboarding
 const organizationView = ref('list') // 'list' or 'register'
 const inviteModalRef = ref()
 const router = useRouter()
+
+// Track whether user has manually selected a menu item
+const userSelectedMenu = ref(false)
 
 // Stats data from API
 const stats = ref({
@@ -40,7 +55,29 @@ const stats = ref({
 const userData = ref<UserListResponse['data']['users']>([])
 const loading = ref(false)
 
-// Load user data and stats
+// Set menu selection based on active component
+const updateSelectedMenu = () => {
+  // Only update if user hasn't manually selected a menu item
+  if (!userSelectedMenu.value && props.activeComponent === 'workflow-management') {
+    selectedKeys.value = ['5'] // Select the Workflow Management menu item
+  } else if (!props.activeComponent && !selectedKeys.value.length) {
+    // Only set default if no active component and no current selection
+    selectedKeys.value = ['2'] // Default to User Onboarding
+  }
+}
+
+// Watch for menu selection changes to track manual selection
+watch(
+  selectedKeys,
+  (newKeys, oldKeys) => {
+    // If menu selection changed and it's not from prop initialization, mark as user selected
+    if (oldKeys && newKeys[0] !== oldKeys[0]) {
+      userSelectedMenu.value = true
+    }
+  },
+  { deep: true },
+)
+
 const loadUserData = async () => {
   try {
     loading.value = true
@@ -60,12 +97,84 @@ const loadUserData = async () => {
   }
 }
 
+// Watch for prop changes to update menu selection
+watch(
+  () => props.activeComponent,
+  () => {
+    console.log('📋 DashboardView activeComponent changed to:', props.activeComponent)
+    // Reset user selection flag when navigating via route
+    if (props.activeComponent) {
+      userSelectedMenu.value = false
+    }
+    updateSelectedMenu()
+  },
+  { immediate: true },
+)
+
+// Watch for fileId prop changes
+watch(
+  () => props.fileId,
+  (newFileId, oldFileId) => {
+    console.log('🔄 DashboardView fileId prop changed from', oldFileId, 'to', newFileId)
+  },
+  { immediate: true },
+)
+
+// Handle manual menu selection
+const handleMenuSelect = (info: { key: string | number }) => {
+  const key = String(info.key)
+
+  // Skip logout handling here since it's handled separately
+  if (key === 'logout') {
+    return
+  }
+
+  selectedKeys.value = [key]
+  userSelectedMenu.value = true
+
+  // If we're currently on a workflow route, navigate back to dashboard
+  // This ensures the URL changes from /workflow/fileId back to /dashboard
+  const currentRoute = router.currentRoute.value
+  if (currentRoute.name === 'workflow-management') {
+    console.log('🔄 Navigating from workflow route back to dashboard:', {
+      currentRoute: currentRoute.name,
+      currentPath: currentRoute.path,
+      selectedMenuItem: key,
+    })
+    router.push({ name: 'dashboard' })
+  }
+}
+
+// Update menu selection when component mounts
 onMounted(() => {
+  updateSelectedMenu()
   loadUserData()
 })
 
-// Compute which component to show based on selected menu item
+// Compute which component to show based on selected menu item or props
 const currentComponent = computed(() => {
+  // If user has manually selected a menu item, always use that
+  if (userSelectedMenu.value) {
+    switch (selectedKeys.value[0]) {
+      case '1':
+        return 'FileDataDashboard'
+      case '5':
+        return 'WorkflowManagement'
+      case '3':
+        return 'Organization'
+      case '4':
+        return 'PolicyList'
+      default:
+        return 'UserOnboarding'
+    }
+  }
+
+  // If activeComponent is passed as prop and user hasn't manually selected, use it
+  if (props.activeComponent === 'workflow-management') {
+    return 'WorkflowManagement'
+  }
+
+  // Otherwise use the menu selection
   switch (selectedKeys.value[0]) {
     case '1':
       return 'FileDataDashboard'
@@ -203,7 +312,12 @@ const handleLogout = () => {
 
       <div class="flex flex-col h-[calc(100vh-4rem)] overflow-hidden">
         <!-- Navigation Menu -->
-        <Menu v-model:selectedKeys="selectedKeys" mode="inline" class="border-r-0 flex-1">
+        <Menu
+          v-model:selectedKeys="selectedKeys"
+          mode="inline"
+          class="border-r-0 flex-1"
+          @select="handleMenuSelect"
+        >
           <Menu.Item key="1">
             <template #icon>
               <img :src="dashboardIcon" alt="Dashboard" class="w-5 h-5" />
@@ -252,7 +366,11 @@ const handleLogout = () => {
         <FileDataDashboard v-if="currentComponent === 'FileDataDashboard'" />
 
         <!-- Workflow Management section -->
-        <WorkflowManagement v-else-if="currentComponent === 'WorkflowManagement'" />
+        <WorkflowManagement
+          v-else-if="currentComponent === 'WorkflowManagement'"
+          :key="`workflow-${fileId || 'default'}`"
+          :fileId="fileId"
+        />
 
         <!-- Policy List section -->
         <PolicyList v-else-if="currentComponent === 'PolicyList'" />

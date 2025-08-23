@@ -7,7 +7,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="bg-white rounded-lg border border-gray-200 p-4">
         <div class="flex items-center">
           <div class="p-2 bg-blue-100 rounded-lg">
@@ -20,8 +20,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Active Workflows</p>
-            <p class="text-2xl font-bold text-gray-900">{{ activeWorkflows }}</p>
+            <p class="text-sm font-medium text-gray-600">Total Workflow Records</p>
+            <p class="text-2xl font-bold text-gray-900">{{ totalRecords }}</p>
           </div>
         </div>
       </div>
@@ -38,26 +38,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Completed Today</p>
-            <p class="text-2xl font-bold text-gray-900">{{ completedToday }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg border border-gray-200 p-4">
-        <div class="flex items-center">
-          <div class="p-2 bg-yellow-100 rounded-lg">
-            <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Pending</p>
-            <p class="text-2xl font-bold text-gray-900">{{ pendingWorkflows }}</p>
+            <p class="text-sm font-medium text-gray-600">Success Workflow Records</p>
+            <p class="text-2xl font-bold text-gray-900">{{ successRecords }}</p>
           </div>
         </div>
       </div>
@@ -74,459 +56,226 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Failed</p>
-            <p class="text-2xl font-bold text-gray-900">{{ failedWorkflows }}</p>
+            <p class="text-sm font-medium text-gray-600">Failed Workflow Records</p>
+            <p class="text-2xl font-bold text-gray-900">{{ failedRecords }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="flex items-center gap-4 mb-6">
-      <Button
-        type="primary"
-        @click="createWorkflow"
-        class="px-4 py-2"
-        style="background-color: #4f46e5; border-color: #4f46e5; color: white"
-      >
-        <template #icon>
-          <PlusOutlined />
-        </template>
-        Create New Workflow
-      </Button>
-      <Button @click="refreshWorkflows" :loading="loading" class="px-4 py-2">
-        <template #icon>
-          <ReloadOutlined />
-        </template>
-        Refresh
-      </Button>
-    </div>
-
-    <!-- Workflows Table -->
-    <div class="bg-white rounded-lg border border-gray-200">
+    <!-- Workflow Data Display Section (shown when fileId is provided) -->
+    <div v-if="fileId" class="bg-white rounded-lg border border-gray-200 mt-6">
       <div class="p-6 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-800">Workflow List</h3>
+        <h3 class="text-lg font-semibold text-gray-800">Workflow Data</h3>
+        <div class="flex items-center gap-2 mt-2">
+          <Tag color="blue">Total: {{ totalRecords }}</Tag>
+          <Tag color="green">Success: {{ successRecords }}</Tag>
+          <Tag color="red">Failed: {{ failedRecords }}</Tag>
+        </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <Table
-          :columns="columns"
-          :data-source="workflows"
-          :loading="loading"
-          :pagination="{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-          }"
-          row-key="id"
-          class="workflows-table"
-        >
-          <template #bodyCell="{ column, record }">
-            <!-- Workflow Name -->
-            <template v-if="column.key === 'name'">
-              <div class="flex items-center space-x-2">
-                <svg class="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fill-rule="evenodd"
-                    d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                <span class="text-sm font-medium text-gray-900">{{ record.name }}</span>
-              </div>
-            </template>
+      <!-- File Information Section -->
+      <div v-if="fileMetadata" class="p-6 border-b border-gray-200 bg-gray-50">
+        <h4 class="text-md font-medium text-gray-800 mb-4">File Information</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600">File ID</label>
+            <p class="text-sm text-gray-900 mt-1">{{ fileMetadata.file_id || '-' }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600">File Name</label>
+            <p class="text-sm text-gray-900 mt-1">{{ fileMetadata.fileName || '-' }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Domain Name</label>
+            <p class="text-sm text-gray-900 mt-1">{{ fileMetadata.domain_name || '-' }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Uploaded By</label>
+            <p class="text-sm text-gray-900 mt-1">{{ fileMetadata.uploaded_by || '-' }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Organization ID</label>
+            <p class="text-sm text-gray-900 mt-1">{{ fileMetadata.organization_id || '-' }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Policy ID</label>
+            <p class="text-sm text-gray-900 mt-1">{{ fileMetadata.policy_id || '-' }}</p>
+          </div>
+        </div>
+      </div>
 
-            <!-- Status Badge -->
-            <template v-else-if="column.key === 'status'">
-              <Tag :color="getStatusColor(record.status)" class="font-medium">
-                {{ getStatusText(record.status) }}
-              </Tag>
-            </template>
-
-            <!-- Progress Bar -->
-            <template v-else-if="column.key === 'progress'">
-              <div class="w-full">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs text-gray-600">{{ record.progress }}%</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    class="h-2 rounded-full"
-                    :class="getProgressColor(record.status)"
-                    :style="{ width: record.progress + '%' }"
-                  ></div>
-                </div>
-              </div>
-            </template>
-
-            <!-- Created Date -->
-            <template v-else-if="column.key === 'created_date'">
-              <div>
-                <p class="text-sm text-gray-900">{{ formatDate(record.created_date) }}</p>
-                <p class="text-xs text-gray-500">{{ formatTime(record.created_date) }}</p>
-              </div>
-            </template>
-
-            <!-- Actions -->
-            <template v-else-if="column.key === 'actions'">
-              <div class="flex items-center space-x-2">
-                <Tooltip title="View Details">
-                  <Button
-                    type="text"
-                    size="small"
-                    class="text-blue-600 hover:text-blue-800"
-                    @click="viewWorkflow(record as Workflow)"
-                  >
-                    <EyeOutlined />
-                  </Button>
-                </Tooltip>
-
-                <Tooltip title="Edit Workflow">
-                  <Button
-                    type="text"
-                    size="small"
-                    class="text-green-600 hover:text-green-800"
-                    @click="editWorkflow(record as Workflow)"
-                  >
-                    <EditOutlined />
-                  </Button>
-                </Tooltip>
-
-                <Tooltip title="Delete Workflow">
-                  <Button
-                    type="text"
-                    size="small"
-                    class="text-red-600 hover:text-red-800"
-                    @click="deleteWorkflow(record as Workflow)"
-                  >
-                    <DeleteOutlined />
-                  </Button>
-                </Tooltip>
-              </div>
-            </template>
-          </template>
-        </Table>
+      <div class="p-4">
+        <WorkflowDataTable
+          :data="workflowData"
+          :dynamic-fields="dynamicFields"
+          :loading="workflowDataLoading"
+          :error="workflowError"
+          @refresh="loadWorkflowData"
+          @view-details="viewRecordDetails"
+        />
       </div>
     </div>
-
-    <!-- Workflow Detail Modal -->
-    <Modal v-model:open="showDetailModal" title="Workflow Details" :footer="null" width="800px">
-      <div v-if="selectedWorkflow" class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-600">Workflow Name</label>
-            <p class="text-sm text-gray-900 p-2 bg-gray-50 rounded">{{ selectedWorkflow.name }}</p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600">Status</label>
-            <Tag :color="getStatusColor(selectedWorkflow.status)">
-              {{ getStatusText(selectedWorkflow.status) }}
-            </Tag>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600">Progress</label>
-            <p class="text-sm text-gray-900 p-2 bg-gray-50 rounded">
-              {{ selectedWorkflow.progress }}%
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600">Type</label>
-            <p class="text-sm text-gray-900 p-2 bg-gray-50 rounded">{{ selectedWorkflow.type }}</p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600">Created Date</label>
-            <p class="text-sm text-gray-900 p-2 bg-gray-50 rounded">
-              {{ formatDateTime(selectedWorkflow.created_date) }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600">Updated Date</label>
-            <p class="text-sm text-gray-900 p-2 bg-gray-50 rounded">
-              {{ formatDateTime(selectedWorkflow.updated_date) }}
-            </p>
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600">Description</label>
-          <p class="text-sm text-gray-900 p-2 bg-gray-50 rounded">
-            {{ selectedWorkflow.description }}
-          </p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600">Workflow ID</label>
-          <p class="text-xs text-gray-600 p-2 bg-gray-50 rounded font-mono">
-            {{ selectedWorkflow.id }}
-          </p>
-        </div>
-      </div>
-    </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { Button, Modal, message, Table, Tag, Tooltip } from 'ant-design-vue'
-import {
-  PlusOutlined,
-  ReloadOutlined,
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from '@ant-design/icons-vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { message, Tag } from 'ant-design-vue'
+import { useRoute } from 'vue-router'
+import { workflowService, type WorkflowDataRecord } from '@/services/workflow.service'
+import WorkflowDataTable from './WorkflowDataTable.vue'
 
-// Define workflow interface
-interface Workflow {
-  id: string
-  name: string
-  type: string
-  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'PAUSED'
-  progress: number
-  description: string
-  created_date: string
-  updated_date: string
-}
+// Define props
+const props = defineProps<{
+  fileId?: string
+}>()
 
 // Component state
-const loading = ref(false)
-const workflows = ref<Workflow[]>([])
-const showDetailModal = ref(false)
-const selectedWorkflow = ref<Workflow | null>(null)
+const route = useRoute()
 
-// Sample data
-const sampleWorkflows: Workflow[] = [
-  {
-    id: 'wf-001',
-    name: 'Customer Data Validation',
-    type: 'Data Processing',
-    status: 'RUNNING',
-    progress: 75,
-    description: 'Validates customer data against predefined rules and policies',
-    created_date: '2025-01-15 09:30:00',
-    updated_date: '2025-01-15 14:20:00',
-  },
-  {
-    id: 'wf-002',
-    name: 'Product Catalog Sync',
-    type: 'Data Synchronization',
-    status: 'COMPLETED',
-    progress: 100,
-    description: 'Synchronizes product catalog data across multiple systems',
-    created_date: '2025-01-15 08:00:00',
-    updated_date: '2025-01-15 08:45:00',
-  },
-  {
-    id: 'wf-003',
-    name: 'Location Data Import',
-    type: 'Data Import',
-    status: 'PENDING',
-    progress: 0,
-    description: 'Imports location data from external sources',
-    created_date: '2025-01-15 10:15:00',
-    updated_date: '2025-01-15 10:15:00',
-  },
-  {
-    id: 'wf-004',
-    name: 'Vendor Quality Check',
-    type: 'Data Quality',
-    status: 'FAILED',
-    progress: 45,
-    description: 'Performs quality checks on vendor data',
-    created_date: '2025-01-15 07:20:00',
-    updated_date: '2025-01-15 12:30:00',
-  },
-  {
-    id: 'wf-005',
-    name: 'Master Data Cleansing',
-    type: 'Data Cleansing',
-    status: 'PAUSED',
-    progress: 60,
-    description: 'Cleanses and standardizes master data records',
-    created_date: '2025-01-15 06:45:00',
-    updated_date: '2025-01-15 13:10:00',
-  },
-]
+// Workflow data state
+const workflowDataLoading = ref(false)
+const workflowData = ref<WorkflowDataRecord[]>([])
+const workflowError = ref<string | null>(null)
+const dynamicFields = ref<string[]>([])
+const selectedRecord = ref<WorkflowDataRecord | null>(null)
+const totalRecords = ref(0)
+const successRecords = ref(0)
+const failedRecords = ref(0)
+const fileMetadata = ref<WorkflowDataRecord | null>(null)
 
-// Table columns
-const columns = [
-  {
-    title: 'Workflow Name',
-    dataIndex: 'name',
-    key: 'name',
-    width: 250,
-  },
-  {
-    title: 'Type',
-    dataIndex: 'type',
-    key: 'type',
-    width: 150,
-  },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    width: 120,
-  },
-  {
-    title: 'Progress',
-    dataIndex: 'progress',
-    key: 'progress',
-    width: 150,
-  },
-  {
-    title: 'Created',
-    dataIndex: 'created_date',
-    key: 'created_date',
-    width: 140,
-  },
-  {
-    title: 'Actions',
-    key: 'actions',
-    width: 150,
-    fixed: 'right' as const,
-  },
-]
+// Get fileId from props or route params (to handle both scenarios)
+const fileId = computed(() => {
+  const id = props.fileId || (route.params.fileId as string)
+  console.log(
+    '🆔 Computed fileId:',
+    id,
+    'from props:',
+    props.fileId,
+    'from route:',
+    route.params.fileId,
+    'route path:',
+    route.path,
+  )
+  return id
+})
 
-// Computed statistics
-const activeWorkflows = computed(
-  () => workflows.value.filter((w) => w.status === 'RUNNING' || w.status === 'PENDING').length,
-)
-const completedToday = computed(
-  () => workflows.value.filter((w) => w.status === 'COMPLETED').length,
-)
-const pendingWorkflows = computed(
-  () => workflows.value.filter((w) => w.status === 'PENDING').length,
-)
-const failedWorkflows = computed(() => workflows.value.filter((w) => w.status === 'FAILED').length)
+// Method to load workflow data for a specific file
+const loadWorkflowData = async () => {
+  console.log('📊 loadWorkflowData called with fileId:', fileId.value)
+  if (!fileId.value) return
 
-// Methods
-const loadWorkflows = async () => {
   try {
-    loading.value = true
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    workflows.value = [...sampleWorkflows]
-    console.log('Loaded workflows:', workflows.value.length)
+    workflowDataLoading.value = true
+    workflowError.value = null
+
+    // Clear previous data when loading new file
+    workflowData.value = []
+    fileMetadata.value = null
+    dynamicFields.value = []
+    totalRecords.value = 0
+    successRecords.value = 0
+    failedRecords.value = 0
+
+    console.log('🔄 Making API call for fileId:', fileId.value)
+    const response = await workflowService.getWorkflowData(fileId.value)
+
+    if (response.success && response.data) {
+      workflowData.value = response.data.dataRecords
+      totalRecords.value = response.totalRecord || 0
+      successRecords.value = response.data.successRecords || 0
+      failedRecords.value = response.data.failedRecords || 0
+
+      // Extract common fields and dynamic fields
+      if (workflowData.value.length > 0) {
+        // Set file metadata from the first record
+        fileMetadata.value = workflowData.value[0]
+
+        // Metadata fields that should be displayed above the table
+        const metadataFields = [
+          'file_id',
+          'fileName',
+          'domain_name',
+          'uploaded_by',
+          'organization_id',
+          'policy_id',
+        ]
+
+        // Extract dynamic fields (fields that are not metadata or system fields)
+        const allFields = new Set<string>()
+        workflowData.value.forEach((record) => {
+          Object.keys(record).forEach((key) => {
+            if (
+              !metadataFields.includes(key) &&
+              key !== 'id' &&
+              key !== 'created_date' &&
+              key !== 'failed_validations'
+            ) {
+              allFields.add(key)
+            }
+          })
+        })
+
+        dynamicFields.value = Array.from(allFields)
+        console.log('Metadata fields:', metadataFields)
+        console.log('Dynamic fields:', dynamicFields.value)
+      }
+
+      message.success(`Loaded ${workflowData.value.length} workflow records`)
+    } else {
+      workflowError.value = response.message || 'Failed to load workflow data'
+      message.error(workflowError.value)
+    }
   } catch (error) {
-    console.error('Failed to load workflows:', error)
-    message.error('Failed to load workflows')
+    console.error('Error loading workflow data:', error)
+    workflowError.value = 'Failed to load workflow data. Please try again later.'
+    message.error(workflowError.value)
   } finally {
-    loading.value = false
+    workflowDataLoading.value = false
   }
 }
 
-const refreshWorkflows = () => {
-  loadWorkflows()
-  message.success('Workflows refreshed')
-}
-
-const createWorkflow = () => {
-  message.info('Create workflow functionality will be implemented')
-}
-
-const viewWorkflow = (workflow: Workflow) => {
-  selectedWorkflow.value = workflow
-  showDetailModal.value = true
-}
-
-const editWorkflow = (workflow: Workflow) => {
-  message.info(`Edit workflow: ${workflow.name}`)
-}
-
-const deleteWorkflow = (workflow: Workflow) => {
-  Modal.confirm({
-    title: 'Delete Workflow',
-    content: `Are you sure you want to delete "${workflow.name}"? This action cannot be undone.`,
-    okText: 'Delete',
-    okType: 'danger',
-    cancelText: 'Cancel',
-    onOk: () => {
-      workflows.value = workflows.value.filter((w) => w.id !== workflow.id)
-      message.success(`Workflow "${workflow.name}" has been deleted`)
-    },
-  })
-}
-
-// Utility functions
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'PENDING':
-      return 'orange'
-    case 'RUNNING':
-      return 'blue'
-    case 'COMPLETED':
-      return 'green'
-    case 'FAILED':
-      return 'red'
-    case 'PAUSED':
-      return 'purple'
-    default:
-      return 'default'
-  }
-}
-
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'PENDING':
-      return 'Pending'
-    case 'RUNNING':
-      return 'Running'
-    case 'COMPLETED':
-      return 'Completed'
-    case 'FAILED':
-      return 'Failed'
-    case 'PAUSED':
-      return 'Paused'
-    default:
-      return status
-  }
-}
-
-const getProgressColor = (status: string) => {
-  switch (status) {
-    case 'COMPLETED':
-      return 'bg-green-500'
-    case 'RUNNING':
-      return 'bg-blue-500'
-    case 'FAILED':
-      return 'bg-red-500'
-    case 'PAUSED':
-      return 'bg-purple-500'
-    default:
-      return 'bg-gray-400'
-  }
-}
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString()
-}
-
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString()
-}
-
-const formatDateTime = (dateString: string) => {
-  return new Date(dateString).toLocaleString()
+// View record details
+const viewRecordDetails = (record: WorkflowDataRecord) => {
+  selectedRecord.value = record
+  console.log('Selected record:', record)
 }
 
 // Lifecycle
 onMounted(() => {
-  loadWorkflows()
+  // Load workflow data for the specific file if fileId is provided
+  if (fileId.value) {
+    loadWorkflowData()
+  }
 })
+
+// Watch for fileId changes to reload data when navigating between different files
+watch(
+  () => fileId.value,
+  (newFileId, oldFileId) => {
+    console.log('🔍 FileId watcher triggered:', { newFileId, oldFileId, hasValue: !!newFileId })
+    // Only reload if fileId actually changed and is not empty
+    if (newFileId && newFileId !== oldFileId) {
+      console.log('📂 File ID changed from', oldFileId, 'to', newFileId, '- Loading data...')
+      loadWorkflowData()
+    }
+  },
+  { immediate: true },
+)
+
+// Also watch for route changes to catch navigation events
+watch(
+  () => route.params.fileId,
+  (newFileId, oldFileId) => {
+    console.log('🛣️ Route fileId changed:', { newFileId, oldFileId, routePath: route.path })
+    // This will trigger the fileId computed which will trigger the first watcher
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
-:deep(.workflows-table) {
-  .ant-table-thead > tr > th {
-    background: #fafafa;
-    font-weight: 600;
-  }
-
-  .ant-table-tbody > tr:hover > td {
-    background: #f8fafc;
-  }
-}
-
 :deep(.ant-tag) {
   border-radius: 6px;
   font-weight: 500;

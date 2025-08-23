@@ -30,6 +30,16 @@ const router = createRouter({
       component: InvitationVerifyView,
       props: true,
     },
+    {
+      path: '/workflow/:fileId',
+      name: 'workflow-management',
+      component: DashboardView,
+      props: (route) => ({
+        fileId: route.params.fileId,
+        activeComponent: 'workflow-management',
+      }),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 
