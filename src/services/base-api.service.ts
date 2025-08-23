@@ -31,6 +31,7 @@ export class ApiService {
         console.log('API Request:', {
           url: config.url,
           method: config.method,
+          headers: config.headers,
           hasToken: !!token,
         })
         if (token) {
@@ -106,34 +107,40 @@ export class ApiService {
 
   protected async get<T, P = Record<string, unknown>>(
     url: string,
-    params?: P,
+    config?: { params?: P; headers?: Record<string, string> },
   ): Promise<AxiosResponse<T>> {
-    return this.api.get<T>(url, { params })
+    return this.api.get<T>(url, config)
   }
 
   protected async post<T, D = Record<string, unknown>>(
     url: string,
     data?: D,
+    config?: { headers?: Record<string, string> },
   ): Promise<AxiosResponse<T>> {
-    return this.api.post<T>(url, data)
+    return this.api.post<T>(url, data, config)
   }
 
   protected async put<T, D = Record<string, unknown>>(
     url: string,
     data?: D,
+    config?: { headers?: Record<string, string> },
   ): Promise<AxiosResponse<T>> {
-    return this.api.put<T>(url, data)
+    return this.api.put<T>(url, data, config)
   }
 
-  protected async delete<T>(url: string): Promise<AxiosResponse<T>> {
-    return this.api.delete<T>(url)
+  protected async delete<T>(
+    url: string,
+    config?: { headers?: Record<string, string> },
+  ): Promise<AxiosResponse<T>> {
+    return this.api.delete<T>(url, config)
   }
 
   protected async patch<T, D = Record<string, unknown>>(
     url: string,
     data?: D,
+    config?: { headers?: Record<string, string> },
   ): Promise<AxiosResponse<T>> {
-    return this.api.patch<T>(url, data)
+    return this.api.patch<T>(url, data, config)
   }
 }
 

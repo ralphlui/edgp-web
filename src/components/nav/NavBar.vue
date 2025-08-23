@@ -7,8 +7,12 @@ import AppAuth from '../auth/AppAuth.vue'
 const route = useRoute()
 const authRef = ref()
 
-// Hide navbar on dashboard
-const shouldShowNavbar = computed(() => route.path !== '/dashboard')
+// Hide navbar on authenticated routes (any route that requires authentication)
+const shouldShowNavbar = computed(() => {
+  // Check if the current route requires authentication
+  const requiresAuth = route.matched.some((record) => record.meta.requiresAuth)
+  return !requiresAuth
+})
 
 const handleGetStarted = () => {
   authRef.value?.showModal()
