@@ -53,10 +53,9 @@ export const API_ENDPOINTS: ApiEndpoints = {
   // workflowBase: import.meta.env.VITE_WORKFLOW_API_URL || 'http://localhost:8084/api',
 
   base: import.meta.env.VITE_ADMIN_API_URL || 'https://devplify.com/api/admin',
-  orgBase: import.meta.env.VITE_ORGANIZATION_API_URL || 'https://devplify.com/api/orgs',
-  policyBase: import.meta.env.VITE_POLICY_API_URL || 'https://devplify.com/api/policy',
-  fileManagementBase:
-    import.meta.env.VITE_FILE_MANAGEMENT_API_URL || 'https://devplify.com/api/mdm',
+  orgBase: import.meta.env.VITE_ORGANIZATION_API_URL || 'https://devplify.com/api',
+  policyBase: import.meta.env.VITE_POLICY_API_URL || 'https://devplify.com/api',
+  fileManagementBase: import.meta.env.VITE_MDM_API_URL || 'https://devplify.com',
   workflowBase: import.meta.env.VITE_WORKFLOW_API_URL || 'https://devplify.com/api',
 
   auth: {
