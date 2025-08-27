@@ -564,7 +564,7 @@ const loadFiles = async (silent = false) => {
       if (!silent) {
         message.warning(
           'File management API is not available. Please ensure the API server is running on : ',
-          import.meta.env.VITE_FILE_MANAGEMENT_API_URL,
+          import.meta.env.VITE_MDM_API_URL,
         )
       }
 
