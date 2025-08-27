@@ -55,7 +55,7 @@ export const API_ENDPOINTS: ApiEndpoints = {
   base: import.meta.env.VITE_ADMIN_API_URL || 'https://devplify.com/api/admin',
   orgBase: import.meta.env.VITE_ORGANIZATION_API_URL || 'https://devplify.com/api',
   policyBase: import.meta.env.VITE_POLICY_API_URL || 'https://devplify.com/api',
-  fileManagementBase: import.meta.env.VITE_MDM_API_URL || 'https://devplify.com',
+  fileManagementBase: import.meta.env.VITE_MDM_API_URL || 'https://devplify.com/api/mdm',
   workflowBase: import.meta.env.VITE_WORKFLOW_API_URL || 'https://devplify.com/api',
 
   auth: {
@@ -90,9 +90,9 @@ export const API_ENDPOINTS: ApiEndpoints = {
     myPolicy: '/policy/my-policy',
   },
   fileManagement: {
-    list: '/api/mdm/data/file',
-    delete: '/api/mdm/data/file',
-    retry: '/api/mdm/data/file',
+    list: '/data/file',
+    delete: '/data/file',
+    retry: '/data/file',
   },
   workflow: {
     list: '/wfm',
