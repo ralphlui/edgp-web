@@ -563,7 +563,8 @@ const loadFiles = async (silent = false) => {
       // Only show warning for manual refresh, not auto-refresh
       if (!silent) {
         message.warning(
-          'File management API is not available. Please ensure the API server is running on http://localhost:8083',
+          'File management API is not available. Please ensure the API server is running on : ',
+          import.meta.env.VITE_FILE_MANAGEMENT_API_URL,
         )
       }
 
