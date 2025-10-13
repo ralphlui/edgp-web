@@ -43,6 +43,9 @@ interface ApiEndpoints {
   workflow: {
     list: string
   }
+  masterData: {
+    domainData: string
+  }
 }
 
 export const API_ENDPOINTS: ApiEndpoints = {
@@ -96,5 +99,8 @@ export const API_ENDPOINTS: ApiEndpoints = {
   },
   workflow: {
     list: '/wfm',
+  },
+  masterData: {
+    domainData: '/wfm/domainData',
   },
 }

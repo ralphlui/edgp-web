@@ -8,6 +8,7 @@ import {
   LogoutOutlined,
   FileProtectOutlined,
   ProjectOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons-vue'
 import { Layout, Menu, Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
@@ -18,6 +19,7 @@ import WorkflowManagement from '@/components/workflowManagement/WorkflowManageme
 import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
 import OrganizationList from '@/components/organisations/OrganizationList.vue'
 import PolicyList from '@/components/policyManagement/PolicyList.vue'
+import MasterDataManagement from '@/components/masterData/MasterDataManagement.vue'
 import { authService } from '@/services/auth.service'
 import { userService } from '@/services/user.service'
 import { useAuthStore } from '@/stores/auth'
@@ -173,6 +175,8 @@ const currentComponent = computed(() => {
         return 'Organization'
       case '4':
         return 'PolicyList'
+      case '6':
+        return 'MasterDataManagement'
       default:
         return 'UserOnboarding'
     }
@@ -193,6 +197,8 @@ const currentComponent = computed(() => {
       return 'Organization'
     case '4':
       return 'PolicyList'
+    case '6':
+      return 'MasterDataManagement'
     default:
       return 'UserOnboarding'
   }
@@ -357,6 +363,12 @@ const handleLogout = () => {
             </template>
             <span>Workflow Management</span>
           </Menu.Item>
+          <Menu.Item v-if="canAccessMdm" key="6">
+            <template #icon>
+              <DatabaseOutlined />
+            </template>
+            <span>Master Data Management</span>
+          </Menu.Item>
           <Menu.Divider class="my-2" />
           <Menu.Item key="logout" @click="handleLogout">
             <template #icon>
@@ -383,6 +395,9 @@ const handleLogout = () => {
 
         <!-- Policy List section -->
         <PolicyList v-else-if="currentComponent === 'PolicyList'" />
+
+        <!-- Master Data Management section -->
+        <MasterDataManagement v-else-if="currentComponent === 'MasterDataManagement'" />
 
         <!-- Organization section with nested views -->
         <template v-else-if="currentComponent === 'Organization'">
