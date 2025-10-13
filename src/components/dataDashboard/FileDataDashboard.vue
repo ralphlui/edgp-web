@@ -5,6 +5,7 @@ import { PlusOutlined, InboxOutlined, EyeOutlined, DeleteOutlined } from '@ant-d
 import { policyService, type Policy } from '@/services/policy.service'
 import { fileUploadService, type FileUploadResponse } from '@/services/file-upload.service'
 import UploadedFilesList from './UploadedFilesList.vue'
+import { usePermissions } from '@/composables/usePermissions'
 
 // Types for file preview
 interface CSVRow {
@@ -18,6 +19,11 @@ interface TableColumn {
   width?: number
   align?: 'left' | 'center' | 'right'
 }
+
+// Permissions
+const { canManageResource, canViewResource } = usePermissions()
+const canManageMdm = canManageResource('mdm')
+const canViewMdm = canViewResource('mdm')
 
 // Component state
 const showUploadModal = ref(false)
@@ -430,6 +436,7 @@ const handleErrorModalClose = () => {
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">File and Data Dashboard</h1>
       <Button
+        v-if="canManageMdm"
         type="primary"
         size="large"
         class="h-12 px-8 text-lg flex items-center gap-1"
@@ -439,6 +446,7 @@ const handleErrorModalClose = () => {
         <PlusOutlined />
         Upload File
       </Button>
+      <span v-else-if="canViewMdm" class="text-gray-500 text-lg"> View Only Access </span>
     </div>
 
     <!-- Uploaded Files List and Management Section -->

@@ -4,8 +4,14 @@ import { Button, message } from 'ant-design-vue'
 import { organizationService } from '@/services/organization.service'
 import type { Organization } from '@/services/organization.service'
 import OrganizationDetailModal from './OrganizationDetailModal.vue'
+import { usePermissions } from '@/composables/usePermissions'
 
 const emit = defineEmits(['register-click'])
+
+// Permissions
+const { canManageResource, canViewResource } = usePermissions()
+const canManageOrgs = canManageResource('org')
+const canViewOrgs = canViewResource('org')
 
 const organizations = ref<Organization[]>([])
 const loading = ref(false)
@@ -103,6 +109,7 @@ onMounted(() => {
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Organization Management</h1>
       <Button
+        v-if="canManageOrgs"
         type="primary"
         class="px-4 py-2 text-sm text-white rounded-lg flex items-center justify-center"
         style="background-color: #4f46e5"
@@ -110,6 +117,7 @@ onMounted(() => {
       >
         Register Organization
       </Button>
+      <span v-else-if="canViewOrgs" class="text-gray-500 text-sm"> View Only Access </span>
     </div>
 
     <!-- Organization table -->

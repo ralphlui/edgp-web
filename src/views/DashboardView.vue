@@ -22,6 +22,7 @@ import { authService } from '@/services/auth.service'
 import { userService } from '@/services/user.service'
 import { useAuthStore } from '@/stores/auth'
 import type { UserListResponse } from '@/services/user.service'
+import { usePermissions } from '@/composables/usePermissions'
 
 // Define props
 const props = defineProps<{
@@ -54,6 +55,14 @@ const stats = ref({
 // User data from API
 const userData = ref<UserListResponse['data']['users']>([])
 const loading = ref(false)
+
+// Permissions
+const { hasAccess } = usePermissions()
+
+// Check access to different components
+const canAccessOrganizations = hasAccess('org')
+const canAccessPolicies = hasAccess('policy')
+const canAccessMdm = hasAccess('mdm')
 
 // Set menu selection based on active component
 const updateSelectedMenu = () => {
@@ -318,7 +327,7 @@ const handleLogout = () => {
           class="border-r-0 flex-1"
           @select="handleMenuSelect"
         >
-          <Menu.Item key="1">
+          <Menu.Item v-if="canAccessMdm" key="1">
             <template #icon>
               <img :src="dashboardIcon" alt="Dashboard" class="w-5 h-5" />
             </template>
@@ -330,19 +339,19 @@ const handleLogout = () => {
             </template>
             <span>User Onboarding</span>
           </Menu.Item>
-          <Menu.Item key="3">
+          <Menu.Item v-if="canAccessOrganizations" key="3">
             <template #icon>
               <BankOutlined />
             </template>
             <span>Organization Management</span>
           </Menu.Item>
-          <Menu.Item key="4">
+          <Menu.Item v-if="canAccessPolicies" key="4">
             <template #icon>
               <FileProtectOutlined />
             </template>
             <span>Policy Management</span>
           </Menu.Item>
-          <Menu.Item key="5">
+          <Menu.Item v-if="canAccessMdm" key="5">
             <template #icon>
               <ProjectOutlined />
             </template>

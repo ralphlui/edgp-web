@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 interface Role {
   roleId: string
@@ -17,6 +17,7 @@ interface User {
   email: string
   username: string
   role: Role
+  scope: string
   verified: boolean
   active: boolean
 }
@@ -63,10 +64,18 @@ export const useAuthStore = defineStore('auth', () => {
     if (savedRefreshToken) refreshToken.value = savedRefreshToken
   }
 
+  // Computed getters
+  const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
+  const userRole = computed(() => user.value?.role?.roleName)
+  const userScope = computed(() => user.value?.scope || '')
+
   return {
     user,
     accessToken,
     refreshToken,
+    isAuthenticated,
+    userRole,
+    userScope,
     setAuth,
     clearAuth,
     initAuth,

@@ -15,6 +15,11 @@ class AuthService extends ApiService {
       const { data, headers } = response
       console.debug('[Auth Service] Login response:', {
         success: data.success,
+        message: data.message,
+        userID: data.data?.userID,
+        email: data.data?.email,
+        role: data.data?.role?.roleName,
+        scope: data.data?.scope,
         hasAccessToken: !!data.access_token,
         hasRefreshToken: !!data.refresh_token,
         headers: headers,
@@ -134,6 +139,7 @@ class AuthService extends ApiService {
               email: response.data.data.email,
               username: response.data.data.username,
               role: response.data.data.role.roleName,
+              scope: response.data.data.scope,
               verified: response.data.data.verified,
               active: response.data.data.active,
             }

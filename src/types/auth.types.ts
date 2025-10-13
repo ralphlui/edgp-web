@@ -14,6 +14,7 @@ export interface User {
   email: string
   username: string
   role: Role
+  scope: string
   verified: boolean
   active: boolean
 }
