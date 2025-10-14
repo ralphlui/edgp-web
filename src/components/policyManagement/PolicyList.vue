@@ -6,6 +6,12 @@ import { policyService, type Policy } from '@/services/policy.service'
 import CreatePolicyForm from './CreatePolicyForm.vue'
 import PolicyDetailView from './PolicyDetailView.vue'
 import EditPolicyForm from './EditPolicyForm.vue'
+import { usePermissions } from '@/composables/usePermissions'
+
+// Permissions
+const { canManageResource, canViewResource } = usePermissions()
+const canManagePolicies = canManageResource('policy')
+const canViewPolicies = canViewResource('policy')
 
 // Component state
 const loading = ref(false)
@@ -172,6 +178,7 @@ onMounted(() => {
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Policy Management</h1>
       <Button
+        v-if="canManagePolicies"
         type="primary"
         size="large"
         class="h-12 px-8 text-lg"
@@ -183,6 +190,7 @@ onMounted(() => {
         </template>
         Create New Policy
       </Button>
+      <span v-else-if="canViewPolicies" class="text-gray-500 text-lg"> View Only Access </span>
     </div>
 
     <!-- Statistics Cards -->
@@ -283,6 +291,7 @@ onMounted(() => {
             <!-- Actions Column -->
             <Space v-else-if="column.key === 'actions'">
               <a
+                v-if="canManagePolicies"
                 class="text-blue-600 hover:text-blue-800 cursor-pointer"
                 @click="() => handleEdit(record as Policy)"
               >

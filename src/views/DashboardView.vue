@@ -8,6 +8,8 @@ import {
   LogoutOutlined,
   FileProtectOutlined,
   ProjectOutlined,
+  DatabaseOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons-vue'
 import { Layout, Menu, Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
@@ -18,10 +20,13 @@ import WorkflowManagement from '@/components/workflowManagement/WorkflowManageme
 import OrganizationRegister from '@/components/organisations/OrganizationRegister.vue'
 import OrganizationList from '@/components/organisations/OrganizationList.vue'
 import PolicyList from '@/components/policyManagement/PolicyList.vue'
+import MasterDataManagement from '@/components/masterData/MasterDataManagement.vue'
+import ReportingAnalytics from '@/components/reporting/ReportingAnalytics.vue'
 import { authService } from '@/services/auth.service'
 import { userService } from '@/services/user.service'
 import { useAuthStore } from '@/stores/auth'
 import type { UserListResponse } from '@/services/user.service'
+import { usePermissions } from '@/composables/usePermissions'
 
 // Define props
 const props = defineProps<{
@@ -54,6 +59,14 @@ const stats = ref({
 // User data from API
 const userData = ref<UserListResponse['data']['users']>([])
 const loading = ref(false)
+
+// Permissions
+const { hasAccess } = usePermissions()
+
+// Check access to different components
+const canAccessOrganizations = hasAccess('org')
+const canAccessPolicies = hasAccess('policy')
+const canAccessMdm = hasAccess('mdm')
 
 // Set menu selection based on active component
 const updateSelectedMenu = () => {
@@ -164,6 +177,10 @@ const currentComponent = computed(() => {
         return 'Organization'
       case '4':
         return 'PolicyList'
+      case '6':
+        return 'MasterDataManagement'
+      case '7':
+        return 'ReportingAnalytics'
       default:
         return 'UserOnboarding'
     }
@@ -184,6 +201,10 @@ const currentComponent = computed(() => {
       return 'Organization'
     case '4':
       return 'PolicyList'
+    case '6':
+      return 'MasterDataManagement'
+    case '7':
+      return 'ReportingAnalytics'
     default:
       return 'UserOnboarding'
   }
@@ -318,7 +339,7 @@ const handleLogout = () => {
           class="border-r-0 flex-1"
           @select="handleMenuSelect"
         >
-          <Menu.Item key="1">
+          <Menu.Item v-if="canAccessMdm" key="1">
             <template #icon>
               <img :src="dashboardIcon" alt="Dashboard" class="w-5 h-5" />
             </template>
@@ -330,23 +351,35 @@ const handleLogout = () => {
             </template>
             <span>User Onboarding</span>
           </Menu.Item>
-          <Menu.Item key="3">
+          <Menu.Item v-if="canAccessOrganizations" key="3">
             <template #icon>
               <BankOutlined />
             </template>
             <span>Organization Management</span>
           </Menu.Item>
-          <Menu.Item key="4">
+          <Menu.Item v-if="canAccessPolicies" key="4">
             <template #icon>
               <FileProtectOutlined />
             </template>
             <span>Policy Management</span>
           </Menu.Item>
-          <Menu.Item key="5">
+          <Menu.Item v-if="canAccessMdm" key="5">
             <template #icon>
               <ProjectOutlined />
             </template>
             <span>Workflow Management</span>
+          </Menu.Item>
+          <Menu.Item v-if="canAccessMdm" key="6">
+            <template #icon>
+              <DatabaseOutlined />
+            </template>
+            <span>Master Data Management</span>
+          </Menu.Item>
+          <Menu.Item v-if="canAccessMdm" key="7">
+            <template #icon>
+              <BarChartOutlined />
+            </template>
+            <span>Reporting & Analytics</span>
           </Menu.Item>
           <Menu.Divider class="my-2" />
           <Menu.Item key="logout" @click="handleLogout">
@@ -374,6 +407,12 @@ const handleLogout = () => {
 
         <!-- Policy List section -->
         <PolicyList v-else-if="currentComponent === 'PolicyList'" />
+
+        <!-- Master Data Management section -->
+        <MasterDataManagement v-else-if="currentComponent === 'MasterDataManagement'" />
+
+        <!-- Reporting & Analytics section -->
+        <ReportingAnalytics v-else-if="currentComponent === 'ReportingAnalytics'" />
 
         <!-- Organization section with nested views -->
         <template v-else-if="currentComponent === 'Organization'">
