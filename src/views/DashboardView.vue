@@ -9,6 +9,7 @@ import {
   FileProtectOutlined,
   ProjectOutlined,
   DatabaseOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons-vue'
 import { Layout, Menu, Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
@@ -20,6 +21,7 @@ import OrganizationRegister from '@/components/organisations/OrganizationRegiste
 import OrganizationList from '@/components/organisations/OrganizationList.vue'
 import PolicyList from '@/components/policyManagement/PolicyList.vue'
 import MasterDataManagement from '@/components/masterData/MasterDataManagement.vue'
+import ReportingAnalytics from '@/components/reporting/ReportingAnalytics.vue'
 import { authService } from '@/services/auth.service'
 import { userService } from '@/services/user.service'
 import { useAuthStore } from '@/stores/auth'
@@ -177,6 +179,8 @@ const currentComponent = computed(() => {
         return 'PolicyList'
       case '6':
         return 'MasterDataManagement'
+      case '7':
+        return 'ReportingAnalytics'
       default:
         return 'UserOnboarding'
     }
@@ -199,6 +203,8 @@ const currentComponent = computed(() => {
       return 'PolicyList'
     case '6':
       return 'MasterDataManagement'
+    case '7':
+      return 'ReportingAnalytics'
     default:
       return 'UserOnboarding'
   }
@@ -369,6 +375,12 @@ const handleLogout = () => {
             </template>
             <span>Master Data Management</span>
           </Menu.Item>
+          <Menu.Item v-if="canAccessMdm" key="7">
+            <template #icon>
+              <BarChartOutlined />
+            </template>
+            <span>Reporting & Analytics</span>
+          </Menu.Item>
           <Menu.Divider class="my-2" />
           <Menu.Item key="logout" @click="handleLogout">
             <template #icon>
@@ -398,6 +410,9 @@ const handleLogout = () => {
 
         <!-- Master Data Management section -->
         <MasterDataManagement v-else-if="currentComponent === 'MasterDataManagement'" />
+
+        <!-- Reporting & Analytics section -->
+        <ReportingAnalytics v-else-if="currentComponent === 'ReportingAnalytics'" />
 
         <!-- Organization section with nested views -->
         <template v-else-if="currentComponent === 'Organization'">
