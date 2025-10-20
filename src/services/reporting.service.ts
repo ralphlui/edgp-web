@@ -1,5 +1,5 @@
-import { API_ENDPOINTS } from '@/config/api.config'
 import { ApiService } from './base-api.service'
+import { ENV } from '../config/env.config'
 
 export interface ChatMessage {
   id: string
@@ -14,6 +14,7 @@ export interface ChartData {
   description: string
   type: 'bar' | 'line' | 'pie' | 'area'
   data?: Record<string, unknown>[]
+  image?: string // Base64 image data from API
 }
 
 export interface ReportInsight {
@@ -43,14 +44,21 @@ export interface AnalyticsReport {
 export interface ChatResponse {
   success: boolean
   message: string
+  chart_image?: string // Base64 encoded chart image from API
   report?: AnalyticsReport
+}
+
+export interface ApiChatResponse {
+  success: boolean
+  message: string
+  chart_image?: string
 }
 
 class ReportingService extends ApiService {
   constructor() {
     super()
-    // Set the base URL for workflow API - same pattern as other services
-    this.api.defaults.baseURL = API_ENDPOINTS.workflowBase
+    // Use environment variable for analytics API URL
+    this.api.defaults.baseURL = ENV.ANALYTICS_API_URL
   }
 
   /**
@@ -60,26 +68,80 @@ class ReportingService extends ApiService {
     try {
       console.log(`Sending chat message: ${message}`)
 
+      // Get the access token from localStorage
+      const token = localStorage.getItem('access_token')
+
+      if (!token) {
+        throw new Error('No access token found. Please login first.')
+      }
+
       const config = {
         headers: {
-          'X-FileId': '', // Empty X-FileId header as required by API
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
       }
 
       const payload = {
-        message: message,
-        timestamp: new Date().toISOString(),
+        prompt: message,
       }
 
       console.log('Making chat request with payload:', payload)
-      const response = await this.post<ChatResponse>('/analytics/chat', payload, config)
-      console.log('Chat response:', response.data)
-      return response.data
+      console.log('Request config:', config)
+
+      // Use POST request to /report endpoint (base URL already includes /analytics)
+      const response = await this.post<ApiChatResponse>('/report', payload, config)
+      console.log('Chat API response:', response.data)
+
+      // Convert API response to our internal format
+      const chatResponse: ChatResponse = {
+        success: response.data.success,
+        message: response.data.message,
+        chart_image: response.data.chart_image,
+      }
+
+      // If there's a chart image, create a report with it
+      if (response.data.chart_image) {
+        chatResponse.report = {
+          id: `report-${Date.now()}`,
+          type: 'Analytics Report',
+          timestamp: new Date(),
+          dataSource: 'Analytics API',
+          totalRecords: 1,
+          charts: [
+            {
+              id: 'chart-1',
+              title: 'Analytics Chart',
+              description: 'Generated chart from analytics API',
+              type: 'bar',
+              image: response.data.chart_image, // Store base64 image
+            },
+          ],
+          summary: {
+            insights: [
+              {
+                id: 'insight-1',
+                metric: 'Report Status',
+                value: response.data.success ? 'Generated' : 'Failed',
+                description: 'Chart generation status',
+              },
+            ],
+            totalRecords: 1,
+            generatedAt: new Date(),
+          },
+        }
+      }
+
+      return chatResponse
     } catch (error) {
       console.error('Error sending chat message:', error)
 
-      // Return a mock response for development
-      return this.getMockChatResponse(message)
+      // Return error response instead of mock data
+      return {
+        success: false,
+        message: `Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}. Please check your connection and try again.`,
+      }
     }
   }
 
@@ -90,24 +152,23 @@ class ReportingService extends ApiService {
     try {
       console.log(`Downloading report ${reportId} in ${format} format`)
 
-      const config = {
-        headers: {
-          'X-FileId': '',
-        },
-        params: {
-          reportId: reportId,
-          format: format,
-        },
-        responseType: 'blob' as const,
-      }
+      // For now, we'll implement a basic download functionality
+      // This can be extended when the backend provides a download endpoint
 
-      const response = await this.get<Blob>('/analytics/download', config)
+      // Create a simple text file with report info
+      const reportData = `Analytics Report
+Generated: ${new Date().toLocaleString()}
+Report ID: ${reportId}
+Format: ${format}
 
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]))
+This is a placeholder for the actual report download functionality.
+The backend can provide a specific download endpoint for reports.`
+
+      const blob = new Blob([reportData], { type: 'text/plain' })
+      const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', `report-${reportId}.${format}`)
+      link.setAttribute('download', `analytics-report-${reportId}.txt`)
       document.body.appendChild(link)
       link.click()
       link.remove()
@@ -123,143 +184,30 @@ class ReportingService extends ApiService {
    */
   async getReportTemplates(): Promise<Record<string, unknown>[]> {
     try {
-      const config = {
-        headers: {
-          'X-FileId': '',
-        },
+      const token = localStorage.getItem('access_token')
+
+      if (!token) {
+        throw new Error('No access token found. Please login first.')
       }
 
-      const response = await this.get<{ success: boolean; data: Record<string, unknown>[] }>(
-        '/analytics/templates',
-        config,
-      )
-      return response.data.data
+      // This endpoint might not exist yet, so we'll return empty array for now
+      // Future implementation when backend provides the endpoint:
+      // const config = {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      // }
+      // const response = await this.get<{ success: boolean; data: Record<string, unknown>[] }>('/analytics/templates', config)
+      // return response.data.data
+
+      return []
     } catch (error) {
       console.error('Error fetching report templates:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Mock response for development - remove when backend is ready
-   */
-  private getMockChatResponse(message: string): ChatResponse {
-    const lowerMessage = message.toLowerCase()
-
-    // Simulate different types of responses based on message content
-    if (lowerMessage.includes('customer') || lowerMessage.includes('trend')) {
-      return {
-        success: true,
-        message:
-          "I've analyzed your customer data and generated a comprehensive report showing trends over the last 6 months.",
-        report: {
-          id: `report-${Date.now()}`,
-          type: 'Customer Trends Analysis',
-          timestamp: new Date(),
-          dataSource: 'Customer Database',
-          totalRecords: 1250,
-          charts: [
-            {
-              id: 'chart-1',
-              title: 'Customer Growth Over Time',
-              description: 'Monthly customer acquisition trends',
-              type: 'line',
-              data: [],
-            },
-            {
-              id: 'chart-2',
-              title: 'Customer Distribution by Region',
-              description: 'Geographic distribution of customers',
-              type: 'pie',
-              data: [],
-            },
-          ],
-          data: [
-            { month: 'January', new_customers: 45, total_customers: 1100, growth_rate: '4.3%' },
-            { month: 'February', new_customers: 52, total_customers: 1152, growth_rate: '4.7%' },
-            { month: 'March', new_customers: 38, total_customers: 1190, growth_rate: '3.3%' },
-            { month: 'April', new_customers: 41, total_customers: 1231, growth_rate: '3.4%' },
-            { month: 'May', new_customers: 19, total_customers: 1250, growth_rate: '1.5%' },
-          ],
-          summary: {
-            insights: [
-              {
-                id: 'insight-1',
-                metric: 'Total Customers',
-                value: '1,250',
-                description: 'Active customers in database',
-              },
-              {
-                id: 'insight-2',
-                metric: 'Growth Rate',
-                value: '3.4%',
-                description: 'Average monthly growth',
-              },
-              {
-                id: 'insight-3',
-                metric: 'New This Month',
-                value: '19',
-                description: 'Customers acquired in May',
-              },
-            ],
-            totalRecords: 1250,
-            generatedAt: new Date(),
-          },
-        },
-      }
-    } else if (lowerMessage.includes('product') || lowerMessage.includes('sales')) {
-      return {
-        success: true,
-        message:
-          "Here's your product performance analysis. I can see some interesting patterns in your sales data.",
-        report: {
-          id: `report-${Date.now()}`,
-          type: 'Product Sales Analysis',
-          timestamp: new Date(),
-          dataSource: 'Product Database',
-          totalRecords: 89,
-          charts: [
-            {
-              id: 'chart-1',
-              title: 'Top Performing Products',
-              description: 'Products ranked by sales volume',
-              type: 'bar',
-              data: [],
-            },
-          ],
-          data: [
-            { product_name: 'Product A', sales_volume: 1250, revenue: '$45,000', margin: '35%' },
-            { product_name: 'Product B', sales_volume: 980, revenue: '$38,500', margin: '42%' },
-            { product_name: 'Product C', sales_volume: 750, revenue: '$28,200', margin: '38%' },
-          ],
-          summary: {
-            insights: [
-              {
-                id: 'insight-1',
-                metric: 'Total Products',
-                value: '89',
-                description: 'Active products in catalog',
-              },
-              {
-                id: 'insight-2',
-                metric: 'Best Seller',
-                value: 'Product A',
-                description: 'Highest sales volume',
-              },
-            ],
-            totalRecords: 89,
-            generatedAt: new Date(),
-          },
-        },
-      }
-    } else {
-      return {
-        success: true,
-        message:
-          "I understand you're looking for insights. Could you be more specific about what data you'd like me to analyze? For example, you could ask about customer trends, product performance, location data, or vendor analytics.",
-      }
+      return []
     }
   }
 }
 
 export const reportingService = new ReportingService()
+export default reportingService

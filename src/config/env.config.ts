@@ -3,6 +3,7 @@
 declare interface ImportMetaEnv {
   readonly VITE_ADMIN_API_URL: string
   readonly VITE_ORGANIZATION_API_URL: string
+  readonly VITE_ANALYTICS_API_URL: string
   readonly VITE_API_TIMEOUT: string
   readonly VITE_ENABLE_AUTH: string
   readonly VITE_ENABLE_USER_MANAGEMENT: string
@@ -31,6 +32,7 @@ export const ENV = {
     'VITE_ORGANIZATION_API_URL',
     'http://localhost:8082/api/organization',
   ),
+  ANALYTICS_API_URL: getEnvVar('VITE_ANALYTICS_API_URL', 'http://localhost:8091/api/analytics'),
   API_TIMEOUT: Number(getEnvVar('VITE_API_TIMEOUT', '30000')),
   ENABLE_AUTH: getEnvVar('VITE_ENABLE_AUTH', 'true') === 'true',
   ENABLE_USER_MANAGEMENT: getEnvVar('VITE_ENABLE_USER_MANAGEMENT', 'true') === 'true',

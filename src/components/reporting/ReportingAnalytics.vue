@@ -88,8 +88,16 @@
               <div v-for="chart in currentReport.charts" :key="chart.id" class="chart-item">
                 <div class="chart-title">{{ chart.title }}</div>
                 <div class="chart-placeholder">
-                  <!-- Placeholder for chart component -->
-                  <div class="chart-content">
+                  <!-- Display actual chart image if available -->
+                  <div v-if="chart.image" class="chart-image">
+                    <img
+                      :src="`data:image/png;base64,${chart.image}`"
+                      :alt="chart.title"
+                      class="chart-img"
+                    />
+                  </div>
+                  <!-- Fallback placeholder for chart component -->
+                  <div v-else class="chart-content">
                     <p>{{ chart.description }}</p>
                     <small>Chart data: {{ chart.data?.length || 0 }} points</small>
                   </div>
@@ -437,6 +445,22 @@ const clearReport = () => {
 .chart-content {
   text-align: center;
   color: #8c8c8c;
+}
+
+.chart-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.chart-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .insights-grid {
