@@ -14,8 +14,23 @@ export interface Rule {
   description?: string
 }
 
+export interface AiRuleSuggestion {
+  rule_name: string
+  column_name: string
+  value: {
+    min_value?: number
+    max_value?: number
+    value?: number | string | string[]
+  } | null
+}
+
+export interface AiRuleSuggestionsResponse {
+  rule_suggestions: AiRuleSuggestion[]
+}
+
 class RulesService {
   private api: AxiosInstance
+  private aiApi: AxiosInstance
 
   constructor() {
     // Use environment variable for rules API URL - consistent with other services
@@ -25,6 +40,20 @@ class RulesService {
     // Create a separate axios instance for rules API (no auth required)
     this.api = axios.create({
       baseURL: rulesApiUrl,
+      timeout: 30000,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    })
+
+    // Create axios instance for AI policy suggestions API
+    const aiApiUrl =
+      import.meta.env.VITE_AI_POLICY_SUGGESTIONS_API_URL || 'http://localhost:8092/api/aips'
+    console.log('AI Policy Suggestions API URL from env:', aiApiUrl)
+
+    this.aiApi = axios.create({
+      baseURL: aiApiUrl,
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
@@ -75,6 +104,42 @@ class RulesService {
         })
       }
       throw error
+    }
+  }
+
+  /**
+   * Get AI-powered rule suggestions for a specific domain
+   */
+  async getAiRuleSuggestions(domain: string): Promise<AiRuleSuggestion[]> {
+    try {
+      const domainLower = domain.toLowerCase()
+      const baseUrl = this.aiApi.defaults.baseURL
+      console.log('Making AI suggestions API call to:', `${baseUrl}/rules/suggest`)
+      console.log('Request payload:', { domain: domainLower })
+
+      const response = await this.aiApi.post<AiRuleSuggestionsResponse>('/rules/suggest', {
+        domain: domainLower,
+      })
+
+      console.log('AI suggestions API response:', response.data)
+
+      if (!response.data.rule_suggestions || !Array.isArray(response.data.rule_suggestions)) {
+        console.error('Invalid AI suggestions response format:', response.data)
+        return []
+      }
+
+      return response.data.rule_suggestions
+    } catch (error) {
+      console.error('AI suggestions API error:', error)
+      if (axios.isAxiosError(error)) {
+        console.error('Axios error details:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+        })
+      }
+      // Return empty array instead of throwing to avoid breaking the form
+      return []
     }
   }
 }
