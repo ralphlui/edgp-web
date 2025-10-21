@@ -117,9 +117,29 @@ class RulesService {
       console.log('Making AI suggestions API call to:', `${baseUrl}/rules/suggest`)
       console.log('Request payload:', { domain: domainLower })
 
-      const response = await this.aiApi.post<AiRuleSuggestionsResponse>('/rules/suggest', {
-        domain: domainLower,
-      })
+      // Get the access token from localStorage
+      const token = localStorage.getItem('access_token')
+
+      if (!token) {
+        console.warn('No access token found for AI suggestions API')
+        return []
+      }
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      }
+
+      const response = await this.aiApi.post<AiRuleSuggestionsResponse>(
+        '/rules/suggest',
+        {
+          domain: domainLower,
+        },
+        config,
+      )
 
       console.log('AI suggestions API response:', response.data)
 
