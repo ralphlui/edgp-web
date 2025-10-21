@@ -61,6 +61,132 @@
             </div>
           </FormItem>
 
+          <!-- AI Suggestions Box -->
+          <div v-if="formData.domainName" class="mb-6">
+            <div
+              class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border-2 border-purple-200"
+            >
+              <div class="flex items-center space-x-2 mb-3">
+                <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 7H7v6h6V7z" />
+                  <path
+                    fill-rule="evenodd"
+                    d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <h3 class="text-lg font-semibold text-purple-800">AI-Suggested Rules</h3>
+                <div v-if="loadingAiSuggestions" class="ml-2 text-sm text-purple-600 animate-pulse">
+                  Loading suggestions...
+                </div>
+              </div>
+
+              <div v-if="loadingAiSuggestions" class="text-center py-4">
+                <div
+                  class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"
+                ></div>
+              </div>
+
+              <div v-else-if="aiSuggestions.length > 0" class="space-y-3">
+                <p class="text-sm text-gray-600 mb-3">
+                  Based on the <strong>{{ formData.domainName }}</strong> domain, our AI recommends
+                  the following rules:
+                </p>
+
+                <div class="space-y-2 max-h-96 overflow-y-auto">
+                  <div
+                    v-for="(suggestion, index) in aiSuggestions"
+                    :key="index"
+                    class="bg-white rounded-md p-3 shadow-sm hover:shadow-md transition-shadow border border-purple-100"
+                  >
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                          <span class="font-semibold text-gray-900">{{
+                            suggestion.rule_name
+                          }}</span>
+                          <span class="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
+                            {{ suggestion.column_name }}
+                          </span>
+                        </div>
+                        <div v-if="suggestion.value" class="text-sm text-gray-600 mt-1">
+                          <span class="font-medium">Suggested values:</span>
+                          <span class="ml-2 text-gray-800">
+                            <template v-if="suggestion.value.min_value !== undefined">
+                              Min: {{ suggestion.value.min_value }}, Max:
+                              {{ suggestion.value.max_value }}
+                            </template>
+                            <template v-else-if="Array.isArray(suggestion.value.value)">
+                              {{ suggestion.value.value.join(', ') }}
+                            </template>
+                            <template v-else-if="suggestion.value.value !== undefined">
+                              {{ suggestion.value.value }}
+                            </template>
+                          </span>
+                        </div>
+                        <div v-else class="text-sm text-gray-500 italic mt-1">
+                          Validation rule (no specific value required)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-3 p-2 bg-purple-50 rounded text-xs text-purple-700">
+                  <strong>💡 Tip:</strong> You can manually select and configure these rules from
+                  the Rules dropdown below.
+                </div>
+              </div>
+
+              <div v-else-if="aiSuggestionsError" class="text-center py-4">
+                <div class="mb-2">
+                  <svg
+                    class="w-12 h-12 mx-auto mb-3 text-orange-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <div class="text-gray-700 font-medium mb-2">AI Suggestions Unavailable</div>
+                  <p class="text-sm text-gray-500">
+                    The AI service couldn't generate suggestions for
+                    <strong>{{ formData.domainName }}</strong
+                    >.
+                  </p>
+                  <p class="text-xs text-gray-400 mt-2">
+                    Please check if the AI service is running on port 8092 or select rules manually
+                    below.
+                  </p>
+                </div>
+              </div>
+
+              <div v-else class="text-center py-4">
+                <div class="text-gray-500 mb-2">
+                  <svg
+                    class="w-12 h-12 mx-auto mb-3 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  No suggestions generated for this domain.
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Rules Lists -->
           <FormItem name="rules" class="mb-6">
             <template #label>
@@ -331,7 +457,7 @@ import {
 } from 'ant-design-vue'
 import { DeleteOutlined, DownloadOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
 import { policyService, type CreatePolicyRequest } from '@/services/policy.service'
-import { rulesService, type Rule } from '@/services/rules.service'
+import { rulesService, type Rule, type AiRuleSuggestion } from '@/services/rules.service'
 import { useAuthStore } from '@/stores/auth'
 
 // Emits
@@ -349,6 +475,11 @@ const loadingRules = ref(false)
 const selectedRuleNames = ref<string[]>([])
 const loadingTemplateFields = ref(false)
 const availableTemplateFields = ref<string[]>([])
+
+// AI suggestions state
+const aiSuggestions = ref<AiRuleSuggestion[]>([])
+const loadingAiSuggestions = ref(false)
+const aiSuggestionsError = ref(false)
 
 // Local interface for form rules (supports multi-select fields)
 interface FormRule {
@@ -445,10 +576,37 @@ const loadRules = async () => {
 }
 
 // Handle domain change
-const handleDomainChange = (value: unknown) => {
+const handleDomainChange = async (value: unknown) => {
   console.log('Domain changed to:', value)
   if (typeof value === 'string') {
     loadTemplateFields(value)
+    // Fetch AI suggestions for the selected domain
+    await loadAiSuggestions(value)
+  }
+}
+
+// Load AI rule suggestions
+const loadAiSuggestions = async (domainName: string) => {
+  try {
+    loadingAiSuggestions.value = true
+    aiSuggestionsError.value = false
+    console.log('Loading AI suggestions for domain:', domainName)
+
+    const suggestions = await rulesService.getAiRuleSuggestions(domainName)
+    aiSuggestions.value = suggestions
+
+    console.log('AI suggestions loaded:', suggestions)
+    if (suggestions.length > 0) {
+      message.success(`${suggestions.length} AI-suggested rules loaded for ${domainName}`)
+    } else {
+      aiSuggestionsError.value = true
+    }
+  } catch (error) {
+    console.error('Error loading AI suggestions:', error)
+    aiSuggestionsError.value = true
+    aiSuggestions.value = []
+  } finally {
+    loadingAiSuggestions.value = false
   }
 }
 
@@ -581,16 +739,21 @@ const loadFieldDefinitions = async () => {
 }
 
 // Filter rules in dropdown
-const filterRuleOption = (input: string, option: { value: string; label: string }) => {
+const filterRuleOption = (input: string, option?: Record<string, unknown>) => {
+  if (!option) return false
+  const value = String(option.value || '')
+  const label = String(option.label || '')
   return (
-    option.value.toLowerCase().includes(input.toLowerCase()) ||
-    option.label.toLowerCase().includes(input.toLowerCase())
+    value.toLowerCase().includes(input.toLowerCase()) ||
+    label.toLowerCase().includes(input.toLowerCase())
   )
 }
 
 // Filter template fields in dropdown
-const filterFieldOption = (input: string, option: { value: string; label: string }) => {
-  return option.value.toLowerCase().includes(input.toLowerCase())
+const filterFieldOption = (input: string, option?: Record<string, unknown>) => {
+  if (!option) return false
+  const value = String(option.value || '')
+  return value.toLowerCase().includes(input.toLowerCase())
 }
 
 // Handle rule selection from dropdown
