@@ -1,0 +1,9 @@
+﻿Field Name,Description,Data Type,Length
+firstname,Customer Name 1,CHAR,35
+lastname,Customer Name 2,CHAR,35
+age,Customer Age,CHAR,3
+gender,Customer Gender,CHAR,15
+email,Customer email,CHAR,35
+phone,Customer phone,CHAR,35
+country,Country,CHAR,35
+address,Customer Address,CHAR,100

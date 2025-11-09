@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edgp-app-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: edgp-app-web
+  template:
+    metadata:
+      labels:
+        app: edgp-app-web
+    spec:
+      containers:
+        - name: edgp-app-web
+          image: public.ecr.aws/q1b5w5y6/edgp-app-web:VERSION
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "100Mi"
+            limits:
+              cpu: "200m"
+              memory: "350Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-k8s-service
+spec:
+  selector:
+    app: edgp-app-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
